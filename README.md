@@ -1,6 +1,6 @@
 # Modelo Padrão
 
-Para me diferenciar um pouco do Atomic Design criado especificamente para o Frontend, estou nomeando como Modelo Padrão a arquitetura/metodologia atômica utilizando Node.js, porém esse nome não quer dizer que ele deva ser um modelo ou um padrão, mas sim faz analogia com O [Modelo Padrão]() da física.
+Para me diferenciar um pouco do Atomic Design criado especificamente para o Frontend, estou nomeando como Modelo Padrão a arquitetura/metodologia atômica que utilizamos com Node.js, porém esse nome não quer dizer que ele deva ser um modelo ou um padrão, mas sim faz analogia com O [Modelo Padrão](https://pt.wikipedia.org/wiki/Modelo_padr%C3%A3o) da Física.
 
 Espero que você curta um pouco de Física para que essa leitura não fique chata, **caso você não curta nem precisa ler o resto.**
 
@@ -12,7 +12,7 @@ Citação no site do [Atomic Design](http://bradfrost.com/blog/post/atomic-web-d
 
 Nessa arquitetura inicial o conceito inicial é:
 
-> Cada campo de um Schema é 1 Átomo, pois é feito de mais de 1 Quark.
+> Cada Model é 1 Organismo que usa o Schema é 1 Molécula, onde campo do Schema é 1 Átomo, sendo esse Átomo feito de mais de 1 Quark.
 
 Deixa eu exemplificar melhor.
 
@@ -54,7 +54,7 @@ module.exports = (v) => v.toLowerCase();
 ```
 
 ```js
-// quark-validate-string-lengthGTE3
+// nameMongooseValidate
 module.exports = (value) => {
   let isEmpty = require('./quarks/isEmpty')(value);
   let isString = require('./quarks/isString')(value);
@@ -64,8 +64,7 @@ module.exports = (value) => {
 }
 ```
 
-
-- **Átomo**:
+- **Átomo do campo name**:
 
 ```js
 // atom-name
@@ -80,7 +79,7 @@ const Atom = {
 module.exports = Atom;
 ```
 
-- **Molécula**:
+- **Molécula do User**:
 
 ```js
 const mongoose = require('mongoose');
@@ -119,6 +118,28 @@ module.exports = CRUD;
 ```
 
 *Não colocarei as Actions para não ficar muito longo, mas estão na nossa aula sobre Mongoose Atomic Design.*
+
+Vamos analisar a **Molécula do User**, perceba que o `module.exports` dele é diretamente a criação do *Schema* então se eu quiser criar [campos virtuais]() nesse *Schema* eu só posso fazer isso no Organismo, o que não é da sua responsabilidade.
+
+Obviamente se quisermos podemos refatorar para:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Molecule = {
+  name: require('./fields/field-name')
+}
+
+const Mol = new Schema(Molecule);
+
+Mol
+  .virtual('name.full')
+  .get(function () {
+    return this.name.first + ' ' + this.name.last;
+  });
+
+module.exports = Mol;
+```
 
 E como você pode ver na [nossa aula eu separei os Quarks em 3 tipos](https://github.com/Webschool-io/Node-Atomic-Design_QUARKS#padrão):
 
@@ -163,7 +184,7 @@ Então podemos ver claramente que os Quarks *up* e *bottom* serão nossos Quarks
 
 Pois os mesmos são os mais básicos dentro da nossa arquitetura.
 
-Você pode pensar: 
+Você pode pensar:
 
 **- Ah para solucionar então é só nomear com os outros Quarks, não?**
 
@@ -310,6 +331,18 @@ module.exports = new Schema(Molecule);
 
 Só não entro nos Organismos pois na Biologia já é bem mais fácil esse conceito de absorção.
 
+**AGORA EU LHE PERGUNTO:**
+
+> O que é uma molécula?
+
+E lhe respondo com esse pedaço da Wikipedia:
+
+> Ligações químicas são uniões estabelecidas entre átomos para formarem moléculas...
+
+*fonte: [https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_qu%C3%ADmica](https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_qu%C3%ADmica)*
+
+Bom isso corrobora nosso conceito até agora.
+
 ### Testes
 
 Olha que coisa louca essa Física e como ela corrobora meus conceitos, até porque não sou burro de criar algo sem **muito embasamento teórico** né?
@@ -340,172 +373,8 @@ Pois então aí que está o pulo do gato, quando você vai testar esse módulo d
 
 ***Perceba que estou adaptando os conceitos para nosso contexto e não apenas seguindo cegamente a Física/Química.***
 
-## Atomic Design - Segunda Opção
-
-Agora a tal da segunda opção que falei que daria para vocês escolherem qual nomenclatura é melhor, mas **lembrem que deve ser a melhor baseada na Física**.
-
-Bom então o que nessa Arquitetura é diferente da outra?
-
-> Basicamente no nível de hierarquia.
-
-**- Ueh mas como assim?**
-
-Na outra Arquitetura:
-
-> Cada campo de um Schema é 1 Átomo, pois é feito de mais de 1 Quark.
-
-Nessa arquitetura será:
-
-> Cada campo de um Schema é 1 Hádron, pois é feito de mais de 1 Quark e seu agrupamento cria 1 Átomo.
-
-Ou seja em vez do Hádron ser apenas um Quark maior
-
-```js
-require('./db/config');
-const mongoose = require('mongoose');
-const Molecule = require('./molecule-user');
-const Organism = mongoose.model('User', Molecule);
-
-module.exports = Organism;
-```
-
-```js
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const Molecule = {
-  name: require('./hadrons/hadron-name')
-, email: require('./hadrons/hadron-email')
-, password: require('./hadrons/hadron-password')
-}
-// aqui vem o Virtual, Plugins, etc
-
-module.exports = new Schema(Molecule);
-```
-
-```js
-// hadron-name
-const Hadron = {
-  type: String
-, get: require('./../quarks/toUpper')
-, set: require('./../quarks/toLower')
-, validate: require('./../hadrons/nameMongooseValidate')
-, required: true
-}
-
-module.exports = Atom;
-```
-
-```js
-// quark-toUpper.js
-module.exports = (v) => v.toUpperCase();
-```
-
-```js
-// quark-toLower.js
-module.exports = (v) => v.toLowerCase();
-```
 
 
-```js
-// nameMongooseValidate
-module.exports = {
-  validator: require('./quark-isStringGTE3')
-, message: require('./quark-isStringGTE3-message')
-};
-```
-
-Que usa:
-
-```js
-// quark-isStringGTE3-message
-module.exports = 'Nome {VALUE} precisa ser maior que 3 caracteres';
-```
-
-E
-
-```js
-// quark-isStringGTE3
-module.exports = (value) => {
-  let isEmpty = require('./quarks/isEmpty')(value);
-  let isString = require('./quarks/isString')(value);
-  if(isEmpty) return false;
-  if(!isString) return false;
-  return value.length > 3;
-}
-```
-
-
-
-
-```
-[QUARKS]
-- is
-- to
-[HADRONS]
-- MongooseValidate
-Campos do Schema
-[ATOMOS]
-Schema
-[MOLECULA]
-Model/Actions
-[ORGANISMO]
-Controller/Regra de Negócio
-```
-
-
-## Atomic Design - Actions
-
-Bom eu falei um monte, porém não falei nada sobre as *Actions*, por quê?
-
-Basicamente a ideia de uma *Action* é bem parecida com um Quark, porém vamos analisar o código de uma:
-
-```js
-// action-create.js
-const callback = require('./action-response-200-json');
-
-module.exports = (Model) => {
-  return (req, res) => {
-    let queryData = '';
-
-    req.on('data', (data) => {
-      queryData += data;
-    });
-
-    req.on('end', () => {
-      const obj = require('querystring').parse(queryData);
-      Model.create(obj, (err, data) => callback(err, data, res));
-    });
-  };
-};
-```
-
-Claramente vemos que ela utiliza outra *Action*:
-
-```js
-// action-response-200-json.js
-module.exports = (err, data, res) => {
-    if (err) return console.log('Erro:', err);
-
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  return res.end(JSON.stringify(data));
-};
-```
-
-Eu iniciei essa Arquitetura com esse nome de *Action* pois na hora fazia mais sentido, porém agora preciso colocar isso na nossa nomenclatura.
-
-### Actions - Primeira Opção
-
-Como na primeira opção nós fazemos composição de mais de 1 Quark, respondendo com outra estrutura, com o Hádron.
-
-**Mas lembra do que eu falei anteriormente?**
-
-> Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
-
-Analisando essa *Action* ja percebemos que ela adiciona lógica, logo não pode ser um Hádron.
-
-
-
-### Actions - Segunda Opção
 
 
 
