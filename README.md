@@ -394,7 +394,7 @@ Pois então aí que está o pulo do gato, quando você vai testar esse módulo d
 
 Bom eu falei um monte, porém não falei nada sobre as *Actions*, por quê?
 
-Basicamente a ideia de uma *Action* é bem parecida com um Quark, porém vamos analisar o código de uma:
+Basicamente a ideia de uma *Action* é bem parecida com um Quark, contudo vamos analisar o código de uma:
 
 ```js
 // action-create.js
@@ -438,7 +438,13 @@ Como nós fazemos composição de mais de 1 Quark, respondendo com outra estrutu
 
 Analisando essa *Action* ja percebemos que ela adiciona lógica, logo não pode ser um Hádron.
 
+E também tem mais um ponto importante:
 
+```js
+const create = require('./actions/action-create')(Model);
+```
 
+Essa Action *maior* sempre irá depender do Model para funcionar.
 
+Foi aqui que aina não achei uma nomenclatura clara para conseguir separar essa Action *maior* das menores.
 
