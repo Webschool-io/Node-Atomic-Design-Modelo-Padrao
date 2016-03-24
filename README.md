@@ -146,6 +146,27 @@ Aí você deve se perguntar?
 
 Conseguiu agora perceber minha dúvida?
 
+Fora que:
+
+> Existem seis tipos de quarks, conhecidos como sabores: up, down, strange, charm, bottom, e top[4] . Os quarks up e down possuem as menores massas entre todos os quarks.
+
+*fonte: [https://pt.wikipedia.org/wiki/Quark](https://pt.wikipedia.org/wiki/Quark)*
+
+Então podemos ver claramente que os Quarks *up* e *bottom* serão nossos Quarks:
+
+- is
+- to
+
+Pois os mesmos são os mais básicos dentro da nossa arquitetura.
+
+Você pode pensar: 
+
+**- Ah para solucionar então é só nomear com os outros Quarks, não?**
+
+Até poderia ser, porém complicaria demais algo que tende a ser muito simples.
+
+> Então como resolver isso?
+
 ## Solução
 
 Bom para solucionar esse problema nessa arquitetura nós podemos adicionar um grupo novo de Quarks chamado:
@@ -157,4 +178,20 @@ Vamos ver o que a [Wikipedia](https://pt.wikipedia.org/wiki/H%C3%A1dron) nos diz
 > ...é uma partícula composta, formada por um estado ligado de quarks. Os hádrons mantêm a sua coesão interna devido à interação forte, de um modo análogo à que mantém os átomos unidos pela força electromagnética. Os hádrons mais conhecidos são os prótons e os neutrons.
 
 Então podemos pensar que o Quark de validação do Mongoose pode ser um Hádron em vez de um Quark, já que o mesmo não muda suas características e sim apenas agrupa Quarks diferentes para criar uma partícula nova.
+
+No Modelo Padrão da Física os Quarks sempre existem como um agrupamento(confinamento) de, pelo menos 3 Quarks:
+
+> Nenhuma pesquisa para quarks livres ou carga elétrica fracionária produziu uma evidência convincente. A ausência de quarks livres foi então sendo incorporada na noção de confinamento, o qual, acredita-se, a teoria de quark deve possuir.
+
+*fonte: [https://pt.wikipedia.org/wiki/Quark#Quarks_livres](https://pt.wikipedia.org/wiki/Quark#Quarks_livres)*
+
+### Testes
+
+Olha que coisa louca essa Física e como ela corrobora meus conceitos, até porque não sou burro de criar algo sem **muito embasamento teórico** né?
+
+Vamos ver se você consegue conceber o seguinte conceito:
+
+> Cada partícula subatômica é descrita por um pequeno conjunto de números quânticos tais como spin J, paridade P, e massa m. Usualmente estas propriedades são diretamente identificadas por experimentos. Contudo, o confinamento torna impossível medir estas propriedades nos quarks. Ao invés disto, elas devem ser inferidas pela medição das propriedades das partículas compostas que são feitas de quarks. Tais inferências são mais fáceis de serem feitas adicionando números quânticos chamados de sabor (flavor).
+
+*fonte: [https://pt.wikipedia.org/wiki/Quark#Confinamento_e_propriedades_dos_quarks](https://pt.wikipedia.org/wiki/Quark#Confinamento_e_propriedades_dos_quarks)*
 
