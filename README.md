@@ -375,7 +375,360 @@ Pois então aí que está o pulo do gato, quando você vai testar esse módulo d
 
 
 
+# VIAGEM
 
+
+## Atomic Design - Segunda Opção
+
+Agora a tal da segunda opção que falei que daria para vocês escolherem qual nomenclatura é melhor, mas **lembrem que deve ser a melhor baseada na Física**.
+
+Bom então o que nessa Arquitetura é diferente da outra?
+
+> Basicamente no nível de hierarquia.
+
+**- Ueh mas como assim?**
+
+Na outra Arquitetura:
+
+> Cada campo de um Schema é 1 Átomo, pois é feito de mais de 1 Quark.
+
+Nessa arquitetura será:
+
+> Cada campo de um Schema é 1 Hádron, pois é feito de mais de 1 Quark e seu agrupamento cria 1 Átomo.
+
+Vamos recordar o conceito de Molécula:
+
+> Ligações químicas são uniões estabelecidas entre átomos para formarem moléculas...
+
+Então aqui 1 Schema é 1 Átomo e o agrupamento de mais de 1 forma 1 Molécula, porém ele dá uma pequena complicada se formos levar ao pé da letra, por quê?
+
+Vamos reusar a Entidade Aluno como exemplo:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./atoms/user');
+const Atom = {
+  user: User
+, cpf: require('./fields/field-cpf')
+, cursos: [require('./fields/field-cursos')]
+}
+
+module.exports = new Schema(Atom);
+```
+
+Consegue imaginar porque está errado conceitualmente esse código?
+
+> Ligações químicas são uniões estabelecidas entre átomos para formarem moléculas...
+
+Nesse caso nós só colocamos 1 Átomo dentro de outro **E ISSO NÃO É POSSÍVEL, na Física!** Então precisamos mudar sua estrutura para algo assim:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./atoms/user');
+const Aluno = require('./atoms/aluno');
+
+const Molecule = {
+  user: User
+, cpf: require('./fields/field-cpf')
+, cursos: [require('./fields/field-cursos')]
+}
+
+module.exports = new Schema(Atom);
+```
+
+Criando uma função igual da absorção porém para uma [ligação covalente](https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_covalente):
+
+>Ligação covalente é uma ligação química caracterizada pelo compartilhamento de um ou mais pares de elétrons entre átomos, causando uma atração mútua entre eles, que mantêm a molécula resultante unida.
+
+*fonte: [https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_covalente](https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_covalente)*
+
+Vamos dizer aqui que eles compartilham o `user._id` entre eles para que ocorra essa ligação. Claramente ninguém quer ter Schemas dessa forma, **sempre** divididos em objetos internos, pois o mais correto é ter os campos diretamente no primeiro nível e só agrupar propriedades em objeto caso ele seja uma Entidade.
+
+Então vamos ver como deveria ficar a Entidade Aluno:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./atoms/user');
+const Molecule = {
+  user: {
+    name: require('./hadrons/field-name')
+  , email: require('./hadrons/field-email')
+  , password: require('./hadrons/field-password')
+  }
+, cpf: require('./hadrons/field-cpf')
+, cursos: [require('./hadrons/field-cursos')]
+}
+
+module.exports = new Schema(Molecule);
+```
+
+Logo podemos criar uma função que nos auxilie na criação dessa estrutura:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./atoms/user');
+const Aluno = require('./atoms/aluno');
+// const Aluno = {
+//   cpf: require('./fields/field-cpf')
+// , cursos: [require('./fields/field-cursos')]
+// };
+let Molecule = {
+}
+
+const createMolecule = (Atom, Molecule) => {
+  for (var prop in Atom) {
+    if (Atom.hasOwnProperty(prop)) {
+      Molecule[prop] = Atom[prop];
+    }
+  }
+};
+
+const createConnection = (Atom, Molecule, name) => {
+  Molecule[name] = Atom;
+};
+
+module.exports = new Schema(Molecule);
+```
+
+A essas alturas você já deve ter certeza que sou louco né?
+
+Porém o conceito base dessa Arquitetura/Nomenclatura é que a Molécula seja o Model com suas *Actions* e Organismo seja o Controller(ou qualquer outro módulo que **USE** as Moléculas), deixando o código assim:
+
+
+```js
+// Molécula
+require('./db/config');
+const mongoose = require('mongoose');
+const Atom = require('./atoms/atom-user');
+const MoleculeStart = mongoose.model('User', Atom);
+
+// Precisa passar o Model para as ações
+const create = require('./actions/action-create')(Molecule);
+const find = require('./actions/action-find')(Molecule);
+const findOne = require('./actions/action-findOne')(Molecule);
+const update = require('./actions/action-update')(Molecule);
+const remove = require('./actions/action-remove')(Molecule);
+
+const MoleculeEnd = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = MoleculeEnd;
+```
+
+Agora nesse contexto nossas Moléculas só possuiriam seus átomos e as *Actions* de CRUD para que o módulo(Organismo) que o utilizar sempre tenha essas funções por padrão e ele só deverá adicionar funções de regra de negócio.
+
+Na Arquitetura/Nomenclatura passada toda a regra de negócio ficava no Organismo também porém além do CRUD ele pode ter qualquer outra funcionalidade.
+
+
+
+
+
+
+
+Ou seja em vez do Hádron ser apenas um Quark maior
+
+```js
+require('./db/config');
+const mongoose = require('mongoose');
+const Molecule = require('./molecule-user');
+const Organism = mongoose.model('User', Molecule);
+
+module.exports = Organism;
+```
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Molecule = {
+  name: require('./hadrons/field-name')
+, email: require('./hadrons/field-email')
+, password: require('./hadrons/field-password')
+}
+// aqui vem o Virtual, Plugins, etc
+
+module.exports = new Schema(Molecule);
+```
+
+```js
+// field-name
+const Hadron = {
+  type: String
+, get: require('./../quarks/toUpper')
+, set: require('./../quarks/toLower')
+, validate: require('./../hadrons/nameMongooseValidate')
+, required: true
+}
+
+module.exports = Atom;
+```
+
+```js
+// quark-toUpper.js
+module.exports = (v) => v.toUpperCase();
+```
+
+```js
+// quark-toLower.js
+module.exports = (v) => v.toLowerCase();
+```
+
+
+```js
+// nameMongooseValidate
+module.exports = {
+  validator: require('./quark-isStringGTE3')
+, message: require('./quark-isStringGTE3-message')
+};
+```
+
+Que usa:
+
+```js
+// quark-isStringGTE3-message
+module.exports = 'Nome {VALUE} precisa ser maior que 3 caracteres';
+```
+
+E
+
+```js
+// quark-isStringGTE3
+module.exports = (value) => {
+  let isEmpty = require('./quarks/isEmpty')(value);
+  let isString = require('./quarks/isString')(value);
+  if(isEmpty) return false;
+  if(!isString) return false;
+  return value.length > 3;
+}
+```
+
+Com certeza você deve se perguntar:
+
+> Pra que isso?
+
+Para satisfazer minha curiosidade oras ehhehehehehe.
+
+Brincadeiras a parte é porque eu consigo explicar físico-quimicamente essas duas opções, mas então o porquê mudar a Arquitetura/Nomenclatura?
+
+Como eu falei anteriormente sobre a **absorção das moléculas** para criar um Schema composto, porém depois que pensei nessa solução me indaguei:
+
+> Porra mas criar molécula maior com outras menores está me lembrando mais Átomos que Moléculas.
+
+Agora eu explico o porquê, voltemos à Entidade User, agora nessa nova Arquitetura/Nomenclatura:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Atom = {
+  name: require('./hadrons/field-name')
+, email: require('./hadrons/field-email')
+, password: require('./hadrons/field-password')
+}
+// aqui vem o Virtual, Plugins, etc q tb são HADRONS
+
+module.exports = new Schema(Atom);
+```
+
+E agora a Entidade Aluno:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./atoms/user');
+const Atom = {
+  user: User
+, cpf: require('./hadrons/field-cpf')
+, cursos: [require('./hadrons/field-cursos')]
+}
+
+module.exports = new Schema(Atom);
+```
+
+**PORRA VÁ SE FODER SUISSA NÃO MUDOU BOSTA NENHUMA ISSO!!!**
+
+> Calma mano eu sei! Mas a ideia não é mudar a estrutura em si, mas sim a nomenclatura para que ela tenha o máximo de embasamento científico corroborando seu conceito.
+
+Nesse caso agora em vez da nossa Molécula fazer uma absorção o nosso Átomo fará uma **ligação**
+
+> Ligações químicas são uniões estabelecidas entre átomos para formarem moléculas
+
+```
+[QUARKS]
+- is
+- to
+[HADRONS]
+- MongooseValidate
+Campos do Schema
+[ATOMOS]
+Schema
+[MOLECULA]
+Model/Actions
+[ORGANISMO]
+Controller/Regra de Negócio
+```
+
+
+## Atomic Design - Actions
+
+Bom eu falei um monte, porém não falei nada sobre as *Actions*, por quê?
+
+Basicamente a ideia de uma *Action* é bem parecida com um Quark, porém vamos analisar o código de uma:
+
+```js
+// action-create.js
+const callback = require('./action-response-200-json');
+
+module.exports = (Model) => {
+  return (req, res) => {
+    let queryData = '';
+
+    req.on('data', (data) => {
+      queryData += data;
+    });
+
+    req.on('end', () => {
+      const obj = require('querystring').parse(queryData);
+      Model.create(obj, (err, data) => callback(err, data, res));
+    });
+  };
+};
+```
+
+Claramente vemos que ela utiliza outra *Action*:
+
+```js
+// action-response-200-json.js
+module.exports = (err, data, res) => {
+    if (err) return console.log('Erro:', err);
+
+  res.writeHead(200, {'Content-Type': 'application/json'});
+  return res.end(JSON.stringify(data));
+};
+```
+
+Eu iniciei essa Arquitetura com esse nome de *Action* pois na hora fazia mais sentido, porém agora preciso colocar isso na nossa nomenclatura.
+
+### Actions - Primeira Opção
+
+Como na primeira opção nós fazemos composição de mais de 1 Quark, respondendo com outra estrutura, com o Hádron.
+
+**Mas lembra do que eu falei anteriormente?**
+
+> Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
+
+Analisando essa *Action* ja percebemos que ela adiciona lógica, logo não pode ser um Hádron.
+
+
+
+### Actions - Segunda Opção
 
 
 
