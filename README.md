@@ -326,16 +326,6 @@ module.exports = new Schema(Aluno);
 ```
 
 
-**AGORA EU LHE PERGUNTO:**
-
-> O que é uma molécula?
-
-E lhe respondo com esse pedaço da Wikipedia:
-
-> Ligações químicas são uniões estabelecidas entre átomos para formarem moléculas...
-
-*fonte: [https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_qu%C3%ADmica](https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_qu%C3%ADmica)*
-
 Bom isso corrobora nosso conceito até agora.
 
 ### Organismo
