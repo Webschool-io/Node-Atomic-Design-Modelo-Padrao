@@ -156,5 +156,5 @@ Vamos ver o que a [Wikipedia](https://pt.wikipedia.org/wiki/H%C3%A1dron) nos diz
 
 > ...é uma partícula composta, formada por um estado ligado de quarks. Os hádrons mantêm a sua coesão interna devido à interação forte, de um modo análogo à que mantém os átomos unidos pela força electromagnética. Os hádrons mais conhecidos são os prótons e os neutrons.
 
-Então 
+Então podemos pensar que o Quark de validação do Mongoose pode ser um Hádron em vez de um Quark, já que o mesmo não muda suas características e sim apenas agrupa Quarks diferentes para criar uma partícula nova.
 
