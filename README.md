@@ -55,11 +55,15 @@ module.exports = (v) => v.toLowerCase();
 
 ```js
 // quark-validate-string-lengthGTE3
-module.exports = {
-  validator: (v) => v >= 18
-, message: 'Nome {VALUE} precisa ser maior que 3 caracteres'
-};
+module.exports = (value) => {
+  let isEmpty = require('./quarks/isEmpty')(value);
+  let isString = require('./quarks/isString')(value);
+  if(isEmpty) return false;
+  if(!isString) return false;
+  return value.length > 3;
+}
 ```
+
 
 - **Átomo**:
 
@@ -69,7 +73,7 @@ const Atom = {
   type: String
 , get: require('./../quarks/toUpper')
 , set: require('./../quarks/toLower')
-, validate: require('./../quarks/notEmptyStringValidate')
+, validate: require('./../quarks/nameMongooseValidate')
 , required: true
 }
 
@@ -125,7 +129,7 @@ E como você pode ver na [nossa aula eu separei os Quarks em 3 tipos](https://gi
 Até aí nenhum problema, porém veja meu Quark `{Name}MongooseValidate`:
 
 ```js
-// quark-validate-string-lengthGTE3
+// nameMongooseValidate
 module.exports = {
   validator: require('./quark-isStringGTE3')
 , message: require('./quark-isStringGTE3-message')
@@ -185,6 +189,28 @@ No Modelo Padrão da Física os Quarks sempre existem como um agrupamento(confin
 
 *fonte: [https://pt.wikipedia.org/wiki/Quark#Quarks_livres](https://pt.wikipedia.org/wiki/Quark#Quarks_livres)*
 
+É por isso que nomeamos nosso módulos atômicos como Quarks, pois ele sozinho não fará nada, só funcionará quando estiver dentro de um Hádron ou Átomo.
+
+Então com esse conceito nossa arquitetura ficará assim:
+
+```
+[QUARKS]
+- is
+- to
+[HADRONS]
+- MongooseValidate
+[ATOMOS]
+- Campos do Schema
+[MOLECULA]
+- Schema
+[ORGANISMO]
+- Model/Actions(falarei adiante)
+[CONTROLLER]
+- usa ORGANISMO
+```
+
+Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
+
 ### Testes
 
 Olha que coisa louca essa Física e como ela corrobora meus conceitos, até porque não sou burro de criar algo sem **muito embasamento teórico** né?
@@ -194,4 +220,168 @@ Vamos ver se você consegue conceber o seguinte conceito:
 > Cada partícula subatômica é descrita por um pequeno conjunto de números quânticos tais como spin J, paridade P, e massa m. Usualmente estas propriedades são diretamente identificadas por experimentos. Contudo, o confinamento torna impossível medir estas propriedades nos quarks. Ao invés disto, elas devem ser inferidas pela medição das propriedades das partículas compostas que são feitas de quarks. Tais inferências são mais fáceis de serem feitas adicionando números quânticos chamados de sabor (flavor).
 
 *fonte: [https://pt.wikipedia.org/wiki/Quark#Confinamento_e_propriedades_dos_quarks](https://pt.wikipedia.org/wiki/Quark#Confinamento_e_propriedades_dos_quarks)*
+
+
+## Atomic Design - Segunda Opção
+
+Agora a tal da segunda opção que falei que daria para vocês escolherem qual nomenclatura é melhor, mas **lembrem que deve ser a melhor baseada na Física**.
+
+Bom então o que nessa Arquitetura é diferente da outra?
+
+> Basicamente o conceito da Molécula e Organismo.
+
+**- Ueh mas como assim?**
+
+Na outra Arquitetura nosso Organismo é o Model com CRUD, certo?
+
+Agora nessa o Organimo será diretamente o Model, porém sem seus *Actions*, por exemplo:
+
+
+```js
+require('./db/config');
+const mongoose = require('mongoose');
+const Molecule = require('./molecule-user');
+const Organism = mongoose.model('User', Molecule);
+
+module.exports = Organism;
+```
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Molecule = {
+  name: require('./atoms/atom-name')
+, email: require('./atoms/atom-email')
+, password: require('./atoms/atom-password')
+}
+// aqui vem o Virtual, Plugins, etc
+
+module.exports = new Schema(Molecule);
+```
+
+```js
+// atom-name
+const Hadron = {
+  type: String
+, get: require('./../quarks/toUpper')
+, set: require('./../quarks/toLower')
+, validate: require('./../hadrons/nameMongooseValidate')
+, required: true
+}
+
+module.exports = Atom;
+```
+
+```js
+// quark-toUpper.js
+module.exports = (v) => v.toUpperCase();
+```
+
+```js
+// quark-toLower.js
+module.exports = (v) => v.toLowerCase();
+```
+
+
+```js
+// nameMongooseValidate
+module.exports = {
+  validator: require('./quark-isStringGTE3')
+, message: require('./quark-isStringGTE3-message')
+};
+```
+
+Que usa:
+
+```js
+// quark-isStringGTE3-message
+module.exports = 'Nome {VALUE} precisa ser maior que 3 caracteres';
+```
+
+E
+
+```js
+// quark-isStringGTE3
+module.exports = (value) => {
+  let isEmpty = require('./quarks/isEmpty')(value);
+  let isString = require('./quarks/isString')(value);
+  if(isEmpty) return false;
+  if(!isString) return false;
+  return value.length > 3;
+}
+```
+
+
+```
+[QUARKS]
+- is
+- to
+[HADRONS]
+- MongooseValidate
+Campos do Schema
+[ATOMOS]
+Schema
+[MOLECULA]
+Model/Actions
+[ORGANISMO]
+Controller/Regra de Negócio
+```
+
+
+## Atomic Design - Actions
+
+Bom eu falei um monte, porém não falei nada sobre as *Actions*, por quê?
+
+Basicamente a ideia de uma *Action* é bem parecida com um Quark, porém vamos analisar o código de uma:
+
+```js
+// action-create.js
+const callback = require('./action-response-200-json');
+
+module.exports = (Model) => {
+  return (req, res) => {
+    let queryData = '';
+
+    req.on('data', (data) => {
+      queryData += data;
+    });
+
+    req.on('end', () => {
+      const obj = require('querystring').parse(queryData);
+      Model.create(obj, (err, data) => callback(err, data, res));
+    });
+  };
+};
+```
+
+Claramente vemos que ela utiliza outra *Action*:
+
+```js
+// action-response-200-json.js
+module.exports = (err, data, res) => {
+    if (err) return console.log('Erro:', err);
+
+  res.writeHead(200, {'Content-Type': 'application/json'});
+  return res.end(JSON.stringify(data));
+};
+```
+
+Eu iniciei essa Arquitetura com esse nome de *Action* pois na hora fazia mais sentido, porém agora preciso colocar isso na nossa nomenclatura.
+
+### Actions - Primeira Opção
+
+Como na primeira opção nós fazemos composição de mais de 1 Quark, respondendo com outra estrutura, com o Hádron.
+
+**Mas lembra do que eu falei anteriormente?**
+
+> Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
+
+Analisando essa *Action* ja percebemos que ela adiciona lógica, logo não pode ser um Hádron.
+
+
+
+### Actions - Segunda Opção
+
+
+
 
