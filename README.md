@@ -175,7 +175,7 @@ Até poderia ser, porém complicaria demais algo que tende a ser muito simples.
 
 Bom para solucionar esse problema nessa arquitetura nós podemos adicionar um grupo novo de Quarks chamado:
 
-> Hádrons.
+### Hádrons
 
 Vamos ver o que a [Wikipedia](https://pt.wikipedia.org/wiki/H%C3%A1dron) nos diz sobre:
 
@@ -211,16 +211,134 @@ Então com esse conceito nossa arquitetura ficará assim:
 
 Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
 
+### Molécula
+
+Beleza resolvemos *esse problema*, agora vamos subir um pouco para a Molécula, como ela é um Schema nós podemos criar 1 Schema baseado em outros Schemas.
+
+**- HEIN!??**
+
+Por exemplo a Molécula Aluno pode ser escrita assim:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./molecules/user');
+const Molecule = {
+  user: User
+, cpf: require('./fields/field-cpf')
+, cursos: [require('./fields/field-cursos')]
+}
+
+module.exports = new Schema(Molecule);
+```
+
+Utilizando a Molécula User:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Molecule = {
+  name: require('./fields/field-name')
+, email: require('./fields/field-email')
+, password: require('./fields/field-password')
+}
+
+module.exports = new Schema(Molecule);
+```
+
+Simplificando, ele se transforma nisso:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./molecules/user');
+const Molecule = {
+  user: {
+    name: require('./fields/field-name')
+  , email: require('./fields/field-email')
+  , password: require('./fields/field-password')
+  }
+, cpf: require('./fields/field-cpf')
+, cursos: [require('./fields/field-cursos')]
+}
+
+module.exports = new Schema(Molecule);
+```
+
+Você não deve ainda ter percebido o problema, mas para mim foi essa composição de uma Molécula maior com 1 ou mais menores.
+
+Fiquei pensando e pensando como é que eu pdia nomear algo assim e rapidamente veio-me na cabeça: **reações químicas**.
+
+> Reação Química é um fenômeno onde os átomos permanecem intactos. Durante as reações, as moléculas iniciais são "desmontadas" e os seus átomos são reaproveitados para "montar" novas moléculas.
+
+Quero que você entenda **muito bem isso aqui**:
+
+> ... é um fenômeno onde os átomos permanecem intactos.
+
+**OU SEJA, NUNCA MODIFIQUE SEUS ÁTOMOS!!!**
+
+**- Mas que tipo de reação usaremos então?**
+
+>Absorção na química é um fenômeno ou processo físico ou químico em que átomos, moléculas ou íons introduzem-se em alguma outra fase, normalmente mais massiva, e fixam-se.
+>...
+>A absorção é basicamente quando algo toma lugar em outra substância.
+
+*fonte: [https://pt.wikipedia.org/wiki/Absor%C3%A7%C3%A3o_(qu%C3%ADmica)](https://pt.wikipedia.org/wiki/Absor%C3%A7%C3%A3o_(qu%C3%ADmica))*
+
+Então nesse caso vimos que a Molécula User tomou o lugar onde seriam seus átomos, caso não reaproveitassemos a Molécula User.
+
+Podemos até pensar em ter uma função para essa reação, por exemplo:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const User = require('./molecules/user');
+
+const absorver = (MoleculeReceive, MoleculeIn, name) => {
+  MoleculeReceive[name] = MoleculeIn;
+  return MoleculeReceive;
+};
+
+let Molecule = {
+, cpf: require('./fields/field-cpf')
+, cursos: [require('./fields/field-cursos')]
+}
+
+Molecule = absorver(Molecule, User, 'user');
+module.exports = new Schema(Molecule);
+```
+
+Só não entro nos Organismos pois na Biologia já é bem mais fácil esse conceito de absorção.
+
 ### Testes
 
 Olha que coisa louca essa Física e como ela corrobora meus conceitos, até porque não sou burro de criar algo sem **muito embasamento teórico** né?
 
 Vamos ver se você consegue conceber o seguinte conceito:
 
-> Cada partícula subatômica é descrita por um pequeno conjunto de números quânticos tais como spin J, paridade P, e massa m. Usualmente estas propriedades são diretamente identificadas por experimentos. Contudo, o confinamento torna impossível medir estas propriedades nos quarks. Ao invés disto, elas devem ser inferidas pela medição das propriedades das partículas compostas que são feitas de quarks. Tais inferências são mais fáceis de serem feitas adicionando números quânticos chamados de sabor (flavor).
+> Cada partícula subatômica é descrita por um pequeno conjunto de números quânticos tais como spin J, paridade P, e massa m. Usualmente estas propriedades são diretamente identificadas por experimentos. Contudo, o confinamento torna impossível medir estas propriedades nos quarks. Ao invés disto, elas devem ser inferidas pela medição das propriedades das partículas compostas que são feitas de quarks.
 
 *fonte: [https://pt.wikipedia.org/wiki/Quark#Confinamento_e_propriedades_dos_quarks](https://pt.wikipedia.org/wiki/Quark#Confinamento_e_propriedades_dos_quarks)*
 
+Quero que você analise comigo essa frase:
+
+> Contudo, o confinamento torna impossível medir estas propriedades nos quarks. Ao invés disto, elas devem ser inferidas pela medição das propriedades das partículas compostas que são feitas de quarks.
+
+Nesse caso o confinamento é nosso Hádron, que nesse exemplo é o `{name}MogooseValidate`: 
+
+```js
+// nameMongooseValidate
+module.exports = {
+  validator: require('./quark-isStringGTE3')
+, message: require('./quark-isStringGTE3-message')
+};
+```
+
+Se fossemos levar ao pé da letra esse conceito físico nós não **conseguiríamos** medir/testar seus Quarks, apenas mediríamos/testaríamos o Hádron. Mas como sabemos podemos testar cada Quark **separadamente**.
+
+Pois então aí que está o pulo do gato, quando você vai testar esse módulo de validação do Mongoose você não testa diretamente OU o `validator` ou a `message`, mas sim a resposta(*medição das propriedades das partículas compostas que são feitas de quarks*). Então você não irá testar somente a validação ou somente a mensagem de erro, mas sim essa composição das 2.
+
+***Perceba que estou adaptando os conceitos para nosso contexto e não apenas seguindo cegamente a Física/Química.***
 
 ## Atomic Design - Segunda Opção
 
@@ -228,14 +346,19 @@ Agora a tal da segunda opção que falei que daria para vocês escolherem qual n
 
 Bom então o que nessa Arquitetura é diferente da outra?
 
-> Basicamente o conceito da Molécula e Organismo.
+> Basicamente no nível de hierarquia.
 
 **- Ueh mas como assim?**
 
-Na outra Arquitetura nosso Organismo é o Model com CRUD, certo?
+Na outra Arquitetura:
 
-Agora nessa o Organimo será diretamente o Model, porém sem seus *Actions*, por exemplo:
+> Cada campo de um Schema é 1 Átomo, pois é feito de mais de 1 Quark.
 
+Nessa arquitetura será:
+
+> Cada campo de um Schema é 1 Hádron, pois é feito de mais de 1 Quark e seu agrupamento cria 1 Átomo.
+
+Ou seja em vez do Hádron ser apenas um Quark maior
 
 ```js
 require('./db/config');
@@ -250,9 +373,9 @@ module.exports = Organism;
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Molecule = {
-  name: require('./atoms/atom-name')
-, email: require('./atoms/atom-email')
-, password: require('./atoms/atom-password')
+  name: require('./hadrons/hadron-name')
+, email: require('./hadrons/hadron-email')
+, password: require('./hadrons/hadron-password')
 }
 // aqui vem o Virtual, Plugins, etc
 
@@ -260,7 +383,7 @@ module.exports = new Schema(Molecule);
 ```
 
 ```js
-// atom-name
+// hadron-name
 const Hadron = {
   type: String
 , get: require('./../quarks/toUpper')
@@ -310,6 +433,8 @@ module.exports = (value) => {
   return value.length > 3;
 }
 ```
+
+
 
 
 ```
