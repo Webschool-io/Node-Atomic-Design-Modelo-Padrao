@@ -119,7 +119,7 @@ module.exports = CRUD;
 
 *Não colocarei as Actions para não ficar muito longo, mas estão na nossa aula sobre Mongoose Atomic Design.*
 
-Vamos analisar a **Molécula do User**, perceba que o `module.exports` dele é diretamente a criação do *Schema* então se eu quiser criar [campos virtuais]() nesse *Schema* eu só posso fazer isso no Organismo, o que não é da sua responsabilidade.
+Vamos analisar a **Molécula do User**, perceba que o `module.exports` dela é diretamente a criação do *Schema* então se eu quiser criar [campos virtuais]() nesse *Schema* eu só posso fazer isso no Organismo, o que não é da sua responsabilidade.
 
 Obviamente se quisermos podemos refatorar para:
 
