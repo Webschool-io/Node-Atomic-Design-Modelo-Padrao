@@ -188,7 +188,7 @@ Pois os mesmos são os mais básicos dentro da nossa arquitetura.
 
 Você pode pensar:
 
-**- Ah para solucionar então é só nomear com os outros Quarks, não?**
+**- Ah! Para solucionar então é só nomear com os outros Quarks, não?**
 
 Até poderia ser, porém complicaria demais algo que tende a ser muito simples.
 
@@ -288,7 +288,7 @@ const Molecule = {
 module.exports = new Schema(Molecule);
 ```
 
-Você não deve ainda ter percebido o problema, mas para mim foi essa composição de uma Molécula maior com 1 ou mais menores.
+Você ainda não deve ter percebido o problema, mas para mim foi essa composição de uma Molécula maior com 1 ou mais Moléculas menores.
 
 Fiquei pensando e pensando como é que eu pdia nomear algo assim e rapidamente veio-me na cabeça: **reações químicas**.
 
