@@ -214,7 +214,18 @@ No Modelo Padrão da Física os Quarks sempre existem como um agrupamento(confin
 
 É por isso que nomeamos nosso módulos atômicos como Quarks, pois ele sozinho não fará nada, só funcionará quando estiver dentro de um Hádron ou Átomo.
 
-Então com esse conceito nossa arquitetura ficará assim:
+Falei, falei e até agora nada de código, né?
+
+Está na hora de definirmos a estrutura do Hádron de Validação do Mongoose:
+
+```js
+module.exports = {
+  validator: require('./../quarks/isString')
+, message: require('./../quarks/isStringMessage')
+};
+```
+
+Com esse conceito nossa arquitetura ficará assim:
 
 ```
 [QUARKS]
@@ -232,7 +243,7 @@ Então com esse conceito nossa arquitetura ficará assim:
 - usa ORGANISMO
 ```
 
-Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
+Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e **NÃO PODE ADICIONAR NENHUMA LÓGICA**, ele deverá apenas utilizar os quarks com sua estrutura específica, nesse caso para Validação do Mongoose.
 
 ### Molécula
 
@@ -795,15 +806,20 @@ Agora precisamos refatorar então o Átomo `name`:
 'use strict';
 
 const QuarksPath = './../quarks/';
+const HadronsPath = './../hadrons/';
 const Structure = require('./nameStructure');
 
 let Atom = Structure;
 
-// Por hora só usamos Quarks no get, set e validate
-const Quarks = ['get', 'set', 'validate'];
+// Por hora só usamos Quarks no get, set e Hadron no validate
+const Quarks = ['get', 'set'];
+const Hadrons = ['validate'];
+
 const confineQuarks = (element, index) => Atom[element] = require(QuarksPath+Structure[element]);
+const confineHadrons = (element, index) => Atom[element] = require(HadronsPath+Structure[element]);
 
 Quarks.forEach(confineQuarks);
+Hadrons.forEach(confineHadrons);
 
 module.exports = Atom;
 ```
