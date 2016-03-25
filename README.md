@@ -8,9 +8,11 @@ Espero que você curta um pouco de Física para que essa leitura não fique chat
 
 Citação no site do [Atomic Design](http://bradfrost.com/blog/post/atomic-web-design/) no qual estou me baseando.
 
-## Atomic Design - Opção Atual
+Porém o Brad Frost que me desculpe mas a Metodologia dele, **na minha opinião**, é incompleta pois ele não coloca **Comportamento/Ações** em seus componentes e eu sim com o [Atomic Design Behavior](http://www.infoq.com/br/presentations/atomic-design-behavior), mas isso é para o Frontend, nosso assunto aqui é BACKEND!
 
-Nessa arquitetura inicial o conceito inicial é:
+## Atomic Design
+
+Nessa arquitetura o conceito inicial é:
 
 > Cada Model é 1 Organismo que usa o Schema é 1 Molécula, onde campo do Schema é 1 Átomo, sendo esse Átomo feito de mais de 1 Quark.
 
@@ -358,6 +360,44 @@ module.exports = Cell;
 
 Para ter um embasamento teórico adequado, nessa parte, tive a ajuda do meu caro aluno/amigo/tetudo-macio [Carlos Machel](https://github.com/carlosmachel).
 
+O conceito biológico nesse código é o seguinte:
+
+> Iremos criar um Organismo novo que possui suas Organelas, as quais fazem as ações dentro de uma Célula.
+
+```js
+// Iremos criar um Organismo
+const Organism = mongoose.model('User', Molecule);
+```
+
+
+```js
+// que possui suas Organelas
+const create = require('./organelles/organelle-create')(Organism);
+const find = require('./organelles/organelle-find')(Organism);
+const findOne = require('./organelles/organelle-findOne')(Organism);
+const update = require('./organelles/organelle-update')(Organism);
+const remove = require('./organelles/organelle-remove')(Organism);
+```
+
+
+```js
+// as quais fazem as ações dentro de uma Célula
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+#### Organelas
+
+Você percebeu então que acabamos mudando a nomenclatura das ***Actions*** para ***Organelles*** para que o conceito biológico por trás estivesse correto.
+
+Pode parecer loucura minha querer embasar essa *Arquitetura* o máximo possível na Biologia, Química e Física; porém **para mim** faz a maior lógica. Eu acho que se cada coisa já tem seu nome então devemos utilizar.
 
 ### Testes
 
@@ -388,8 +428,6 @@ Se fossemos levar ao pé da letra esse conceito físico nós não **conseguiría
 Pois então aí que está o pulo do gato, quando você vai testar esse módulo de validação do Mongoose você não testa diretamente OU o `validator` ou a `message`, mas sim a resposta(*medição das propriedades das partículas compostas que são feitas de quarks*). Então você não irá testar somente a validação ou somente a mensagem de erro, mas sim essa composição das 2.
 
 ***Perceba que estou adaptando os conceitos para nosso contexto e não apenas seguindo cegamente a Física/Química.***
-
-
 
 
 ## Atomic Design - Actions
