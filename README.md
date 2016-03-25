@@ -488,3 +488,121 @@ Essa Action *maior* sempre irá depender do Model para funcionar.
 
 Foi aqui que aina não achei uma nomenclatura clara para conseguir separar essa Action *maior* das menores.
 
+## DNA
+
+**Pare com isso Suissa, já deu!**
+
+![](https://media.giphy.com/media/l2QZWOgzaWBt4VWZW/giphy.gif)
+
+Óbvio que não criamos um padrão de Arquitetura/Nomenclatura a toa né?
+
+Criamos esse padrão para que possamos gerar nossos módulos mais dinamicamente, como por exemplo: a partir de um JSON de configuração.
+
+Como o DNA está dentro da Célula iremos começar nela:
+
+```js
+require('./db/config');
+const mongoose = require('mongoose');
+const Molecule = require('./molecules/user');
+const Organism = mongoose.model('User', Molecule);
+
+// Precisa passar o Model para as ações
+const create = require('./organelles/organelle-create')(Organism);
+const find = require('./organelles/organelle-find')(Organism);
+const findOne = require('./organelles/organelle-findOne')(Organism);
+const update = require('./organelles/organelle-update')(Organism);
+const remove = require('./organelles/organelle-remove')(Organism);
+
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+
+Antes de definir a estrutura do nosso DNA, precisamos analisar esse Organismo para refatorá-lo para algo mais genérico:
+
+```js
+
+const moleculesPath = './molecules/';
+const organellesPath = './organelles/';
+const OrganismName = 'User';
+const Molecule = require(moleculesPath+OrganismName.toLowecase());
+const Organism = mongoose.model(OrganismName, Molecule);
+
+const Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
+
+const create = require(organellesPath+'organelle-create')(Organism);
+const find = require(organellesPath+'organelle-find')(Organism);
+const findOne = require(organellesPath+'organelle-findOne')(Organism);
+const update = require(organellesPath+'organelle-update')(Organism);
+const remove = require(organellesPath+'organelle-remove')(Organism);
+
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+**Já imaginou por que criei o *Array* `Organelles`?**
+
+Então confira comigo abaixo:
+
+```js
+const moleculesPath = './molecules/';
+const organellesPath = './organelles/';
+const OrganismName = 'User';
+const Molecule = require(moleculesPath+OrganismName.toLowecase());
+const Organism = mongoose.model(OrganismName, Molecule);
+
+let Cell = {};
+const Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
+
+const createOrganelles = (element, index) => {
+  Cell[element] =  require(organellesPath+'organelle-'+element)(Organism);
+};
+
+Organelles.forEach(createOrganelles);
+
+module.exports = Cell;
+```
+
+Olhe que maravilha que ficou o código agora, não?
+
+Com isso podemos inferir algumas coisas:
+
+```js
+const moleculesPath = './molecules/';
+const organellesPath = './organelles/';
+```
+
+**Essa configuração é PADRÃO PARA TODOS OS ORGANISMOS**, logo podemos deixar ela de fora do DNA.
+
+```js
+const OrganismName = 'User';
+const Molecule = require(moleculesPath+OrganismName.toLowecase());
+const Organism = mongoose.model(OrganismName, Molecule);
+```
+
+Precisamos converter esse código em uma representação em JSON, que tal essa?
+
+```js
+const DNA = {
+  name: 'User'
+}
+```
+
+Sim daquelas 3 linhas só deixamos o `name` pois a `Molecule` e o `Organism` só dependem desse valor que pode variar o resto **SERÁ SEMPRE A MESMA COISA.**
+
+
+
