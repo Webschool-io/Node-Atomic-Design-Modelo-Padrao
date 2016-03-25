@@ -423,10 +423,7 @@ module.exports = (Organism) => {
 }
 ```
 
-Perceba então que uma Organela só atua realmente dentro do Organismo.
-
-**AINDA PRECISO PENSAR NA NOMENCLATURA DAS ACOES Q ELA USA!!!**
-
+**Perceba então que uma Organela só atua realmente dentro do Organismo.**
 
 ### Testes
 
@@ -458,64 +455,6 @@ Pois então aí que está o pulo do gato, quando você vai testar esse módulo d
 
 ***Perceba que estou adaptando os conceitos para nosso contexto e não apenas seguindo cegamente a Física/Química.***
 
-
-## Atomic Design - Actions
-
-Bom eu falei um monte, porém não falei nada sobre as *Actions*, por quê?
-
-Basicamente a ideia de uma *Action* é bem parecida com um Quark, contudo vamos analisar o código de uma:
-
-```js
-// action-create.js
-const callback = require('./action-response-200-json');
-
-module.exports = (Model) => {
-  return (req, res) => {
-    let queryData = '';
-
-    req.on('data', (data) => {
-      queryData += data;
-    });
-
-    req.on('end', () => {
-      const obj = require('querystring').parse(queryData);
-      Model.create(obj, (err, data) => callback(err, data, res));
-    });
-  };
-};
-```
-
-Claramente vemos que ela utiliza outra *Action*:
-
-```js
-// action-response-200-json.js
-module.exports = (err, data, res) => {
-    if (err) return console.log('Erro:', err);
-
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  return res.end(JSON.stringify(data));
-};
-```
-
-Eu iniciei essa Arquitetura com esse nome de *Action* pois na hora fazia mais sentido, porém agora preciso colocar isso na nossa nomenclatura.
-
-Como nós fazemos composição de mais de 1 Quark, respondendo com outra estrutura, com o Hádron.
-
-**Mas lembra do que eu falei anteriormente?**
-
-> Então para um módulo ser um Hádron ele precisa agregar mais de 1 Quark e não pode adicionar **NENHUMA** lógica nova, ele deverá apenas utilizar os quarks respondendo eles com uma estrutura especial dele.
-
-Analisando essa *Action* ja percebemos que ela adiciona lógica, logo não pode ser um Hádron.
-
-E também tem mais um ponto importante:
-
-```js
-const create = require('./actions/action-create')(Model);
-```
-
-Essa Action *maior* sempre irá depender do Model para funcionar.
-
-Foi aqui que aina não achei uma nomenclatura clara para conseguir separar essa Action *maior* das menores.
 
 ## DNA
 
