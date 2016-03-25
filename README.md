@@ -571,6 +571,8 @@ const Cell = {
 module.exports = Cell;
 ```
 
+### Refatoração
+
 **Já imaginou por que criei o *Array* `Organelles`?**
 
 Então confira comigo abaixo:
@@ -635,21 +637,119 @@ Com isso já conseguimos gerar nosso Organismo, **você duvida?**
 Então vamos lá!
 
 ```js
+'use strict';
+
+const mongoose = require('mongoose');
 const moleculesPath = './molecules/';
 const organellesPath = './organelles/';
-const OrganismName = 'User';
-const Molecule = require(moleculesPath+OrganismName.toLowecase());
-const Organism = mongoose.model(OrganismName, Molecule);
 
-let Cell = {};
-const Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
+module.exports = (DNA) => {
+  const OrganismName = DNA.name;
+  const Molecule = require(moleculesPath+OrganismName);
+  const Organism = mongoose.model(OrganismName, Molecule);
 
-const createOrganelles = (element, index) => {
-  Cell[element] =  require(organellesPath+element)(Organism);
+  let Cell = {};
+  let Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
+
+  DNA.organelles.forEach()
+
+  const createOrganelles = (element, index) => {
+    Cell[element] =  require(organellesPath+element)(Organism);
+    console.log(element, Cell[element]);
+  };
+
+  Organelles.forEach(createOrganelles);
+  return Cell;
+};
+```
+
+Nomei esse módulo, por hora como `GOD.js` e ele é usado assim:
+
+```js
+'use strict';
+
+const DNA = {
+  name: 'User'
+, organelles: ['findByName', 'findByEmail']
+}
+
+const Cell = require('./GOD')(DNA);
+```
+
+E pronto! Agora para criarmos novos Organismos precisamos apenas passar o nome dele e suas Organelas específicas já que **TODOS ORGANISMOS SEMPRE TERÃO AS FUNÇÕES DE CRUD**.
+
+Logicamente você deverá criar as Organelas específicas, caso elas ainda não existam.
+
+Legal conseguimos gerar o Organismo, mas será que conseguimos para a Molécula também? Vamos ver:
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+let UserMolecule = require('./molecules/user');
+let AlunoMolecule = require('./molecules/aluno');
+
+const absorver = (MoleculeReceive, MoleculeIn, name) => {
+  MoleculeReceive[name] = MoleculeIn;
+  return MoleculeReceive;
 };
 
-Organelles.forEach(createOrganelles);
+AlunoMolecule = absorver(AlunoMolecule, UserMolecule, 'user');
 
-module.exports = Cell;
+module.exports = new Schema(AlunoMolecule);
+```
+
+Nessa caso em que temos uma Molécula composta necessitamos definir quais são essas moléculas.
+
+```js
+const DNA = {
+  name: 'User'
+, organelles: ['findByName', 'findByEmail']
+, molecules: ['user', 'aluno']
+}
+```
+
+Nesse momento precisamos criar um módulo que possa criar nossas moléculas dinamicamente utilizando a configuração do nosso DNA, veja como irá ficar:
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const moleculesPath = './molecules/';
+
+module.exports = (DNA) => {
+
+  const absorver = (MoleculeReceive, MoleculeIn, name) => {
+    MoleculeReceive[name] = MoleculeIn;
+    return MoleculeReceive;
+  };
+
+  let Molecules = [];
+
+  DNA.molecules.forEach((element, index) => {
+    Molecules[element] = require(moleculesPath+element);
+  });
+
+  const Molecule = absorver(Molecules['aluno'], Molecules['user'], 'user');
+
+  return new Schema(Molecule);
+};
+```
+
+Utilizei a mesma lógica dos Organismos para gerar as Moléculas:
+
+```js
+DNA.molecules.forEach((element, index) => {
+  Molecules[element] = require(moleculesPath+element);
+});
+```
+
+Para depois fazer com que uma Molécula absorva a outra:
+
+```js
+
+const Molecule = absorver(Molecules['aluno'], Molecules['user'], 'user');
 ```
 
