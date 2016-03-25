@@ -593,22 +593,22 @@ const organellesPath = './organelles/';
 
 module.exports = (DNA) => {
   const OrganismName = DNA.name;
-  const Molecule = require(moleculesPath+OrganismName);
+  const Molecule = require('./REACTIONS')(DNA);
   const Organism = mongoose.model(OrganismName, Molecule);
 
   let Cell = {};
-  let Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
+  const Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
 
-  DNA.organelles.forEach()
+  DNA.organelles.forEach((element, index) => Organelles.push(element));
 
   const createOrganelles = (element, index) => {
     Cell[element] =  require(organellesPath+element)(Organism);
-    console.log(element, Cell[element]);
   };
 
   Organelles.forEach(createOrganelles);
   return Cell;
 };
+
 ```
 
 Nomei esse módulo, por hora como `GOD.js` e ele é usado assim:
@@ -671,6 +671,7 @@ const moleculesPath = './molecules/';
 
 module.exports = (DNA) => {
 
+  const MoleculeName = DNA.name.toLowerCase();
   const absorver = (MoleculeReceive, MoleculeIn, name) => {
     MoleculeReceive[name] = MoleculeIn;
     return MoleculeReceive;
@@ -682,10 +683,10 @@ module.exports = (DNA) => {
     Molecules[element] = require(moleculesPath+element);
   });
 
-  const Molecule = absorver(Molecules['aluno'], Molecules['user'], 'user');
-
+  const Molecule = absorver(Molecules[MoleculeName], Molecules['user'], MoleculeName);
   return new Schema(Molecule);
 };
+
 ```
 
 Utilizei a mesma lógica dos Organismos para gerar as Moléculas:
@@ -699,7 +700,7 @@ DNA.molecules.forEach((element, index) => {
 Para depois fazer com que uma Molécula absorva a outra:
 
 ```js
-const Molecule = absorver(Molecules['aluno'], Molecules['user'], 'user');
+const Molecule = absorver(Molecules['aluno'], Molecules['user'], MoleculeName);
 ```
 
 #### Fábrica de Átomos

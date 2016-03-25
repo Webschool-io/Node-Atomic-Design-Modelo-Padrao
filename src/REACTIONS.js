@@ -6,6 +6,7 @@ const moleculesPath = './molecules/';
 
 module.exports = (DNA) => {
 
+  const MoleculeName = DNA.name.toLowerCase();
   const absorver = (MoleculeReceive, MoleculeIn, name) => {
     MoleculeReceive[name] = MoleculeIn;
     return MoleculeReceive;
@@ -17,7 +18,7 @@ module.exports = (DNA) => {
     Molecules[element] = require(moleculesPath+element);
   });
 
-  const Molecule = absorver(Molecules['aluno'], Molecules['user'], 'user');
+  const Molecule = absorver(Molecules['aluno'], Molecules['user'], MoleculeName);
   return new Schema(Molecule);
 };
 
