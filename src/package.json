@@ -1,0 +1,36 @@
+{
+  "name": "modelo-padrao-atomic-design",
+  "version": "1.0.0",
+  "description": "Arquitetura/Nomenclatura para o Atomic Design com Node.js",
+  "main": "dna.js",
+  "dependencies": {
+    "mongoose": "^4.4.10"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Webschool-io/Node-Atomic-Design-Modelo-Padrao.git"
+  },
+  "keywords": [
+    "atomic",
+    "design",
+    "física",
+    "química",
+    "biologia",
+    "suissa",
+    "loucura",
+    "teta",
+    "macia",
+    "e",
+    "sedosa"
+  ],
+  "author": "Suissa",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/Webschool-io/Node-Atomic-Design-Modelo-Padrao/issues"
+  },
+  "homepage": "https://github.com/Webschool-io/Node-Atomic-Design-Modelo-Padrao#readme"
+}

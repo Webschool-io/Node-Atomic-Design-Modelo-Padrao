@@ -1,0 +1,1 @@
+module.exports = 'Nome {VALUE} precisa ser uma STRING!';
