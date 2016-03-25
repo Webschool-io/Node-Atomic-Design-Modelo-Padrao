@@ -96,17 +96,15 @@ module.exports = new Schema(Molecule);
 - **Organismo**:
 
 ```js
-require('./db/config');
 const mongoose = require('mongoose');
-const Schema = require('./schema');
-const Model = mongoose.model('User', Schema);
+const Molecule = require('./../molecules/user');
+const Organism = mongoose.Organism('User', Molecule);
 
-// Precisa passar o Model para as ações
-const create = require('./actions/action-create')(Model);
-const find = require('./actions/action-find')(Model);
-const findOne = require('./actions/action-findOne')(Model);
-const update = require('./actions/action-update')(Model);
-const remove = require('./actions/action-remove')(Model);
+const create = require('./actions/action-create')(Organism);
+const find = require('./actions/action-find')(Organism);
+const findOne = require('./actions/action-findOne')(Organism);
+const update = require('./actions/action-update')(Organism);
+const remove = require('./actions/action-remove')(Organism);
 
 const CRUD = {
   create
@@ -119,17 +117,17 @@ const CRUD = {
 module.exports = CRUD;
 ```
 
-*Não colocarei as Actions para não ficar muito longo, mas estão na nossa aula sobre Mongoose Atomic Design.*
+*Não colocarei o código as Actions para não ficar muito longo, mas estão na [nossa aula sobre Mongoose Atomic Design](https://github.com/Webschool-io/be-mean-instagram/blob/master/Apostila/module-nodejs/pt-br/mongoose-atomic-design.md#organismo).*
 
 Vamos analisar a **Molécula do User**, perceba que o `module.exports` dela é diretamente a criação do *Schema* então se eu quiser criar [campos virtuais](https://github.com/Webschool-io/be-mean-instagram/blob/master/Apostila/module-nodejs/pt-br/mongoose.md#virtuals) nesse *Schema* eu só posso fazer isso no Organismo, o que não seria da sua responsabilidade.
 
-Obviamente se quisermos podemos refatorar para:
+Se necessário podemos refatorar para:
 
 ```js
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Molecule = {
-  name: require('./fields/field-name')
+  name: require('./atoms/name')
 }
 
 const Mol = new Schema(Molecule);
@@ -154,8 +152,8 @@ Até aí nenhum problema, porém veja meu Quark `{Name}MongooseValidate`:
 ```js
 // nameMongooseValidate
 module.exports = {
-  validator: require('./quark-isStringGTE3')
-, message: require('./quark-isStringGTE3-message')
+  validator: require('./isString')
+, message: require('./isStringMessage')
 };
 ```
 
@@ -196,7 +194,7 @@ Até poderia ser, porém complicaria demais algo que tende a ser muito simples.
 
 ## Solução
 
-Bom para solucionar esse problema nessa arquitetura nós podemos adicionar um grupo novo de Quarks chamado:
+Bom para solucionar esse problema nessa arquitetura nós podemos adicionar uma Particula nova, os...
 
 ### Hádrons
 
