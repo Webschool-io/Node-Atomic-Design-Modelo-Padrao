@@ -14,7 +14,7 @@ Porém o Brad Frost que me desculpe mas a Metodologia dele, **na minha opinião*
 
 Nessa arquitetura o conceito inicial é:
 
-> Cada Model é 1 Organismo que usa o Schema é 1 Molécula, onde campo do Schema é 1 Átomo, sendo esse Átomo feito de mais de 1 Quark.
+> Cada Model é 1 Organismo, que usa o Schema é que é 1 Molécula, onde cada campo do Schema é 1 Átomo, sendo esse Átomo feito de mais de 1 Quark.
 
 Deixa eu exemplificar melhor.
 
