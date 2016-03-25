@@ -397,7 +397,21 @@ module.exports = Cell;
 
 Você percebeu então que acabamos mudando a nomenclatura das ***Actions*** para ***Organelles*** para que o conceito biológico por trás estivesse correto.
 
-Pode parecer loucura minha querer embasar essa *Arquitetura* o máximo possível na Biologia, Química e Física; porém **para mim** faz a maior lógica. Eu acho que se cada coisa já tem seu nome então devemos utilizar.
+Pode parecer loucura minha querer embasar essa *Arquitetura* o máximo possível na Biologia, Química e Física; porém **para mim** faz total sentido.
+
+Eu acho que se cada coisa já possui seu nome então devemos utilizar ele.
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (req, res) => {
+    // const query = getQuery(req);
+
+    // User.find(query, (err, data) => callback(err, data, res));
+  };
+}
+```
 
 ### Testes
 
@@ -507,11 +521,11 @@ const Molecule = require('./molecules/user');
 const Organism = mongoose.model('User', Molecule);
 
 // Precisa passar o Model para as ações
-const create = require('./organelles/organelle-create')(Organism);
-const find = require('./organelles/organelle-find')(Organism);
-const findOne = require('./organelles/organelle-findOne')(Organism);
-const update = require('./organelles/organelle-update')(Organism);
-const remove = require('./organelles/organelle-remove')(Organism);
+const create = require('./organelles/create')(Organism);
+const find = require('./organelles/find')(Organism);
+const findOne = require('./organelles/findOne')(Organism);
+const update = require('./organelles/update')(Organism);
+const remove = require('./organelles/remove')(Organism);
 
 const Cell = {
   create
@@ -523,7 +537,6 @@ const Cell = {
 
 module.exports = Cell;
 ```
-
 
 Antes de definir a estrutura do nosso DNA, precisamos analisar esse Organismo para refatorá-lo para algo mais genérico:
 
@@ -537,11 +550,11 @@ const Organism = mongoose.model(OrganismName, Molecule);
 
 const Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
 
-const create = require(organellesPath+'organelle-create')(Organism);
-const find = require(organellesPath+'organelle-find')(Organism);
-const findOne = require(organellesPath+'organelle-findOne')(Organism);
-const update = require(organellesPath+'organelle-update')(Organism);
-const remove = require(organellesPath+'organelle-remove')(Organism);
+const create = require(organellesPath+'create')(Organism);
+const find = require(organellesPath+'find')(Organism);
+const findOne = require(organellesPath+'findOne')(Organism);
+const update = require(organellesPath+'update')(Organism);
+const remove = require(organellesPath+'remove')(Organism);
 
 const Cell = {
   create
@@ -604,7 +617,35 @@ const DNA = {
 
 Sim daquelas 3 linhas só deixamos o `name` pois a `Molecule` e o `Organism` só dependem desse valor que pode variar o resto **SERÁ SEMPRE A MESMA COISA.**
 
+E também não precisamos adicionar nada sobre o CRUD pois o mesmo também é **SEMPRE A MESMA COISA**, porém teremos que adicionar outras funcionalidades e para isso precisamos adicionar no DNA, por exemplo:
 
+```js
+const DNA = {
+  name: 'User'
+, organelles: ['findByName', 'findByEmail']
+}
+```
 
+Com isso já conseguimos gerar nosso Organismo, **você duvida?**
 
+Então vamos lá!
+
+```js
+const moleculesPath = './molecules/';
+const organellesPath = './organelles/';
+const OrganismName = 'User';
+const Molecule = require(moleculesPath+OrganismName.toLowecase());
+const Organism = mongoose.model(OrganismName, Molecule);
+
+let Cell = {};
+const Organelles = ['create', 'find', 'findOne', 'update', 'remove'];
+
+const createOrganelles = (element, index) => {
+  Cell[element] =  require(organellesPath+element)(Organism);
+};
+
+Organelles.forEach(createOrganelles);
+
+module.exports = Cell;
+```
 
