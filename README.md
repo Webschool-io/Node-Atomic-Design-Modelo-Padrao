@@ -257,8 +257,8 @@ const Schema = mongoose.Schema;
 const User = require('./molecules/user');
 const Molecule = {
   user: User
-, cpf: require('./fields/field-cpf')
-, cursos: [require('./fields/field-cursos')]
+, cpf: require('./atoms/cpf')
+, cursos: [require('./atoms/cursos')]
 }
 
 module.exports = new Schema(Molecule);
@@ -270,9 +270,9 @@ Utilizando a Molécula User:
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Molecule = {
-  name: require('./fields/field-name')
-, email: require('./fields/field-email')
-, password: require('./fields/field-password')
+  name: require('./atoms/name')
+, email: require('./atoms/email')
+, password: require('./atoms/password')
 }
 
 module.exports = new Schema(Molecule);
@@ -286,12 +286,12 @@ const Schema = mongoose.Schema;
 const User = require('./molecules/user');
 const Molecule = {
   user: {
-    name: require('./fields/field-name')
-  , email: require('./fields/field-email')
-  , password: require('./fields/field-password')
+    name: require('./atoms/name')
+  , email: require('./atoms/email')
+  , password: require('./atoms/password')
   }
-, cpf: require('./fields/field-cpf')
-, cursos: [require('./fields/field-cursos')]
+, cpf: require('./atoms/cpf')
+, cursos: [require('./atoms/cursos')]
 }
 
 module.exports = new Schema(Molecule);
@@ -299,7 +299,7 @@ module.exports = new Schema(Molecule);
 
 Você ainda não deve ter percebido o problema, mas para mim foi essa composição de uma Molécula maior com 1 ou mais Moléculas menores.
 
-Fiquei pensando e pensando como é que eu pdia nomear algo assim e rapidamente veio-me na cabeça: **reações químicas**.
+Fiquei pensando e pensando como é que eu poderia nomear algo assim e rapidamente veio-me na cabeça: **reações químicas**.
 
 > Reação Química é um fenômeno onde os átomos permanecem intactos. Durante as reações, as moléculas iniciais são "desmontadas" e os seus átomos são reaproveitados para "montar" novas moléculas.
 
