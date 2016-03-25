@@ -46,12 +46,12 @@ Vamos ver como fica uma definição simples para essa Entidade:
 - **Quarks**:
 
 ```js
-// quark-toUpper.js
+// toUpper.js
 module.exports = (v) => v.toUpperCase();
 ```
 
 ```js
-// quark-toLower.js
+// toLower.js
 module.exports = (v) => v.toLowerCase();
 ```
 
@@ -87,7 +87,7 @@ module.exports = Atom;
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Molecule = {
-  name: require('./fields/field-name')
+  name: require('./atoms/name')
 }
 
 module.exports = new Schema(Molecule);
