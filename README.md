@@ -330,22 +330,22 @@ Bom isso corrobora nosso conceito até agora.
 
 ### Organismo
 
-É aqui que mora minha maior dúvida, como separar e usar as regras de negócio. Pois eu gostaria de separar o **CRUD que é algo padrão para todas as Entidades** das regras de negócio específicas, porém para eu usar as *Actions* eu preciso do *Model*.
+Essa é a nossa última etapa, amém Odin, onde podemos fazer uma analogia do Organismo como uma Célula, já vamos entender o porquê. Para isso vamos recordar do código do Organimo:
 
 ```js
 require('./db/config');
 const mongoose = require('mongoose');
-const Schema = require('./schema');
-const Model = mongoose.model('User', Schema);
+const Molecule = require('./molecules/user');
+const Organism = mongoose.model('User', Molecule);
 
 // Precisa passar o Model para as ações
-const create = require('./actions/action-create')(Model);
-const find = require('./actions/action-find')(Model);
-const findOne = require('./actions/action-findOne')(Model);
-const update = require('./actions/action-update')(Model);
-const remove = require('./actions/action-remove')(Model);
+const create = require('./organelles/organelle-create')(Organism);
+const find = require('./organelles/organelle-find')(Organism);
+const findOne = require('./organelles/organelle-findOne')(Organism);
+const update = require('./organelles/organelle-update')(Organism);
+const remove = require('./organelles/organelle-remove')(Organism);
 
-const CRUD = {
+const Cell = {
   create
 , find
 , findOne
@@ -353,8 +353,10 @@ const CRUD = {
 , remove
 };
 
-module.exports = CRUD;
+module.exports = Cell;
 ```
+
+Para ter um embasamento teórico adequado, nessa parte, tive a ajuda do meu caro aluno/amigo/tetudo-macio [Carlos Machel](https://github.com/carlosmachel).
 
 
 ### Testes
