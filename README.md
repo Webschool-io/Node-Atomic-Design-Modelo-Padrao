@@ -401,17 +401,21 @@ Pode parecer loucura minha querer embasar essa *Arquitetura* o máximo possível
 
 Eu acho que se cada coisa já possui seu nome então devemos utilizar ele.
 
+Inicialmente precisamos identificar qual sua estrutura padrão, nesse caso usando Express (com `req` e `res`):
+
 ```js
 'use strict';
 
 module.exports = (Organism) => {
   return (req, res) => {
-    // const query = getQuery(req);
-
-    // User.find(query, (err, data) => callback(err, data, res));
   };
 }
 ```
+
+Perceba então que uma Organela só atua realmente dentro do Organismo.
+
+**AINDA PRECISO PENSAR NA NOMENCLATURA DAS ACOES Q ELA USA!!!**
+
 
 ### Testes
 
