@@ -789,9 +789,24 @@ module.exports = AtomStructure;
 
 Nós passamos apenas o nome dos Elementos que usaremos, pois onde eles estarão já será definido no nosso padrão.
 
+Agora precisamos refatorar então o Átomo `name`:
 
+```js
+'use strict';
 
+const QuarksPath = './../quarks/';
+const Structure = require('./nameStructure');
 
+let Atom = Structure;
+
+// Por hora só usamos Quarks no get, set e validate
+const Quarks = ['get', 'set', 'validate'];
+const confineQuarks = (element, index) => Atom[element] = require(QuarksPath+Structure[element]);
+
+Quarks.forEach(confineQuarks);
+
+module.exports = Atom;
+```
 
 
 
