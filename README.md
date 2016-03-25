@@ -349,7 +349,6 @@ const mongoose = require('mongoose');
 const Molecule = require('./molecules/user');
 const Organism = mongoose.model('User', Molecule);
 
-// Precisa passar o Model para as ações
 const create = require('./organelles/organelle-create')(Organism);
 const find = require('./organelles/organelle-find')(Organism);
 const findOne = require('./organelles/organelle-findOne')(Organism);
@@ -472,7 +471,6 @@ const mongoose = require('mongoose');
 const Molecule = require('./molecules/user');
 const Organism = mongoose.model('User', Molecule);
 
-// Precisa passar o Model para as ações
 const create = require('./organelles/create')(Organism);
 const find = require('./organelles/find')(Organism);
 const findOne = require('./organelles/findOne')(Organism);
