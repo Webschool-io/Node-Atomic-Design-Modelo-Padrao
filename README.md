@@ -419,7 +419,7 @@ Perceba então que uma Organela só atua realmente dentro do Organismo.
 
 ### Testes
 
-Olha que coisa louca essa Física e como ela corrobora meus conceitos, até porque não sou burro de criar algo sem **muito embasamento teórico** né?
+Olha que coisa louca essa Física e como ela corrobora meus conceitos, até porque não sou burro de criar algo sem **muito embasamento teórico**, né?
 
 Vamos ver se você consegue conceber o seguinte conceito:
 
@@ -605,6 +605,8 @@ const moleculesPath = './molecules/';
 const organellesPath = './organelles/';
 ```
 
+#### Fábrica de Organismos
+
 **Essa configuração é PADRÃO PARA TODOS OS ORGANISMOS**, logo podemos deixar ela de fora do DNA.
 
 ```js
@@ -680,6 +682,8 @@ E pronto! Agora para criarmos novos Organismos precisamos apenas passar o nome d
 
 Logicamente você deverá criar as Organelas específicas, caso elas ainda não existam.
 
+#### Fábrica de Moléculas
+
 Legal conseguimos gerar o Organismo, mas será que conseguimos para a Molécula também? Vamos ver:
 
 ```js
@@ -749,7 +753,45 @@ DNA.molecules.forEach((element, index) => {
 Para depois fazer com que uma Molécula absorva a outra:
 
 ```js
-
 const Molecule = absorver(Molecules['aluno'], Molecules['user'], 'user');
 ```
+
+#### Fábrica de Átomos
+
+Sabemos então que a estrutura de um Átomo é assim:
+
+```js
+const Atom = {
+  type: String
+, get: require('./../quarks/toUpper')
+, set: require('./../quarks/toLower')
+, validate: require('./../quarks/nameMongooseValidate')
+, required: true
+}
+
+module.exports = Atom;
+```
+
+Logo se quisermos criar dinamicamente um Átomo precisaremos dessas informações, podemos fazer dessa forma:
+
+```js
+// nameStructure.js
+const AtomStructure = {
+  type: String
+, get: 'toUpper'
+, set: 'toLower'
+, validate: 'nameMongooseValidate' // é um hadron
+, required: true
+}
+
+module.exports = AtomStructure;
+```
+
+Nós passamos apenas o nome dos Elementos que usaremos, pois onde eles estarão já será definido no nosso padrão.
+
+
+
+
+
+
 
