@@ -178,6 +178,99 @@ Até aí nenhuma lógica ainda foi aplicada, é na etapa da definição dos Quar
 
 ## Quarks
 
+Agora sim iremos iniciar a definição de nossas regras.
+
+### isEmail
+
+```js
+'use strict';
+
+module.exports = (value) => {
+
+  const regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
+
+  const isEmpty = require('../isEmpty/isEmpty')(value);
+  if(isEmpty) return false;
+
+  const isString = require('../isString/isString')(value);
+  if(!isString) return false;
+
+  return regex.test(value);
+}
+```
+
+
+### isEmailMessage
+
+```js
+module.exports = 'O email {VALUE} não é válido!';
+```
+
+### isPassword
+
+```js
+'use strict';
+
+module.exports = (value) => {
+  const isEmpty = require('../isEmpty/isEmpty')(value);
+  const isString = require('../isString/isString')(value);
+
+  if(isEmpty) return false;
+  if(!isString) return false;
+
+  return (value.length > 6 && value.length < 20);
+}
+```
+
+### isPasswordMessage
+
+```js
+module.exports = 'O senha {VALUE} precisa ter tamanho maior que 6 e menor que 20!';
+```
+
+### isName
+
+```js
+'use strict';
+
+module.exports = (value) => {
+  const isEmpty = require('../isEmpty/isEmpty')(value);
+  const isString = require('../isString/isString')(value);
+
+  if(isEmpty) return false;
+  if(!isString) return false;
+
+  return (value.length > 6 && value.length < 20);
+}
+```
+
+### isNameMessage
+
+```js
+module.exports = 'O nome {VALUE} precisa ter tamanho maior que 3 e menor que 80!';
+```
+
+### isDateBirth
+
+```js
+'use strict';
+
+module.exports = (value) => {
+  const isEmpty = require('../isEmpty/isEmpty')(value);
+  const isDate = require('../isDate/isDate')(value);
+
+  if(isEmpty) return false;
+  if(!isDate) return false;
+
+  return true;
+}
+```
+
+### isDateBirthMessage
+
+```js
+module.exports = 'O nome {VALUE} precisa ter tamanho maior que 3 e menor que 80!';
+```
 
 
 ## Moléculas
