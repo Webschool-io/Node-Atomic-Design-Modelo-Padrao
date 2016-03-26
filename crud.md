@@ -176,6 +176,10 @@ module.exports = {
 
 Até aí nenhuma lógica ainda foi aplicada, é na etapa da definição dos Quarks que fazemos isso, pois eles são nossos menores elementos com lógica, para termos um alto reaproveitamento.
 
+## Quarks
+
+
+
 ## Moléculas
 
 ### User

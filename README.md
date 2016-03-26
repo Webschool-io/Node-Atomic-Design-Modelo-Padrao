@@ -441,8 +441,8 @@ Nesse caso o confinamento é nosso Hádron, que nesse exemplo é o `{name}Mogoos
 ```js
 // nameMongooseValidate
 module.exports = {
-  validator: require('./quark-isStringGTE3')
-, message: require('./quark-isStringGTE3-message')
+  validator: require('./../hadrons/isName')
+, message: require('./../hadrons/isNameMeessage')n 
 };
 ```
 
