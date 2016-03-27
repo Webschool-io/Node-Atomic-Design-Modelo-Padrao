@@ -2106,3 +2106,4 @@ module.exports = {
 **Irei refatorar o nome dessas funções e variáveis! Estou criando isso nesse momento e escrevendo por isso está meio zuado ainda.**
 
 E pronto fizemos um populate meia-boca hehehehehee, é porque ainda não fizemos para referências dentro de *Arrays*, ainda.
+
