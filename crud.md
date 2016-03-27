@@ -1720,6 +1720,8 @@ Pois então, tenho péssimas notícias para você:
 
 > Precisamos **REFATORAR!**
 
+#### Populate manual
+
 Precisamos refatorar pois ainda não implementamos o [populate]() do Mongoose, que também já foi explicado em aulas passadas.
 
 Entretanto como eu sou ruim eu vou ensinar a implementarmos nosso próprio populate, vamos iniciar na Organela/Ação `findOne`:
@@ -1844,7 +1846,116 @@ module.exports = (Organism) => {
 
 ```
 
-Versão precisando de refatoramento:
+Só que esse código ainda está muito estático, nós estamos definindo `query = { _id: data.user_id }` diretamente com o nome do campo, mas o correto é criarmos algo genérico.
+
+Para isso precisamos saber quais os campos o *Schema* possui, conseguimos esses dados acessando `Organism.schema.paths`:
+
+```js
+ { user_id: 
+   ObjectId {
+     path: 'user_id',
+     instance: 'ObjectID',
+     validators: [],
+     setters: [],
+     getters: [],
+     options: { type: [Object], ref: 'users' },
+     _index: null },
+  name: 
+   SchemaString {
+     enumValues: [],
+     regExp: null,
+     path: 'name',
+     instance: 'String',
+     validators: [ [Object] ],
+     setters: [],
+     getters: [],
+     options: { type: [Function: String], required: true },
+     _index: null,
+     isRequired: true,
+     requiredValidator: [Function] },
+  _id: 
+   ObjectId {
+     path: '_id',
+     instance: 'ObjectID',
+     validators: [],
+     setters: [ [Function: resetId] ],
+     getters: [],
+     options: { auto: true, type: [Object] },
+     _index: null,
+     defaultValue: [Function: defaultId] },
+  __v: 
+   SchemaNumber {
+     path: '__v',
+     instance: 'Number',
+     validators: [],
+     setters: [],
+     getters: [],
+     options: { type: [Function: Number] },
+     _index: null } }
+```
+
+Precisamos transformar esse Objeto em um Array para facilitar nossa vida, iremos utilizar uma mandinga sapeca agora:
+
+```
+Object.keys(_paths).map( (key) => _paths[key])
+```
+
+O resultado disso é:
+
+```js
+ [ ObjectId {
+    path: 'user_id',
+    instance: 'ObjectID',
+    validators: [],
+    setters: [],
+    getters: [],
+    options: { type: [Object], ref: 'users' },
+    _index: null },
+  SchemaString {
+    enumValues: [],
+    regExp: null,
+    path: 'name',
+    instance: 'String',
+    validators: [ [Object] ],
+    setters: [],
+    getters: [],
+    options: { type: [Function: String], required: true },
+    _index: null,
+    isRequired: true,
+    requiredValidator: [Function] },
+  ObjectId {
+    path: '_id',
+    instance: 'ObjectID',
+    validators: [],
+    setters: [ [Function: resetId] ],
+    getters: [],
+    options: { auto: true, type: [Object] },
+    _index: null,
+    defaultValue: [Function: defaultId] },
+  SchemaNumber {
+    path: '__v',
+    instance: 'Number',
+    validators: [],
+    setters: [],
+    getters: [],
+    options: { type: [Function: Number] },
+    _index: null } ]
+```
+
+Legal agora precisamos iterar nesses objetos para achar a referência `options: { type: [Object], ref: 'users' }`:
+
+```js
+let Refs = {};
+arr.forEach( (element, index) => {
+  if(element.options.ref) {
+    // ACHOU UMA REFERENCIA
+    Refs.ref = element.options.ref;
+    Refs.path = element.path;
+  }
+});
+```
+
+Juntando isso no nosso código anterior e encapsulando a chamada de `populate` em `runPopulate`
 
 ```js
 'use strict';
@@ -1862,34 +1973,38 @@ const populate = (model, query, populateObj) => {
 };
 module.exports = (Organism) => {
   return (obj, callback) => {
-    // console.log('Organism paths', Organism.schema.paths)
-    let ref = false;
-    let refPath = false;
+    let Refs = {};
     let _paths = Organism.schema.paths;
     let arr = Object.keys(_paths).map( (key) => {return _paths[key]});
     const findRef = (arr) => {
       arr.forEach( (element, index) => {
         if(element.options.ref) {
           // ACHOU UMA REFERENCIA
-          ref = element.options.ref;
-          refPath = element.path;
+          Refs.ref = element.options.ref;
+          Refs.path = element.path;
         }
       });
     };
     findRef(arr);
 
-    const runPopulate = (data, ref, refPath) => {
-      const query = { _id: data[refPath] };
-      const populateObj = {base: data, ref: ref, path: refPath, cb: callback};
+    const runPopulate = (data, Refs) => {
+      const query = { _id: data[Refs.path] };
+      const populateObj = {base: data, ref: Refs.ref, path: Refs.path, cb: callback};
       populate(mongoose.model('User'), query, populateObj);
     };
 
     Organism.findOne(obj).lean().exec( (err, data) => {
       if(err) return console.log('ERRO', err);
 
-      if(ref) return runPopulate(data, ref, refPath);
+      if(Object.keys(Refs).length) return runPopulate(data, Refs);
     });
   }
 };
 ```
+
+No último `if` estou testando o tamanho do objeto assim `Object.keys(Refs).length` pois o objeto em si não possui a propriedade `length` como os Arrays, por exemplo. Então preciso só chamarei `runPopulate` caso tivermos referências nesse objeto.
+
+Porém ainda está muito feio esse código então bora...
+
+#### Populate manual refatoração
 
