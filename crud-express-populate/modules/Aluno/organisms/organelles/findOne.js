@@ -1,24 +1,14 @@
 'use strict';
-const mongoose = require('mongoose');
 
 module.exports = (Organism) => {
   return (obj, callback) => {
-
-    const populate = (model, query, base, toPopulate, cb) => {
-      model
-        .findOne(query)
-        .lean()
-        .exec( (err, data) => {
-          base[toPopulate] = data;
-          callback(err, base);
-        });
-    };
+    const arr = require('../../../helpers/prepareDocMongoose')(Organism);
+    const Refs = require('../../../helpers/findRefMongoose')(arr);
+    const Populate = require('../../../helpers/runPopulateMongoose');
 
     Organism.findOne(obj).lean().exec( (err, data) => {
       if(err) return console.log('ERRO', err);
-
-      const query = { _id: data.user_id };
-      populate(mongoose.model('User'), query, data, 'user', callback);
+      if(Object.keys(Refs).length) return Populate.run(data, Refs, callback);
     });
   }
 };

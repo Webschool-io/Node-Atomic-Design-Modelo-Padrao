@@ -1773,6 +1773,8 @@ module.exports = (Organism) => {
 
 Olhe que malandragem sapeca que faço com o `mongoose.model('User')`, isso é possível pois o *Model* é um *Singleton* "global", ou seja, você só pode criar ele 1 vez e depois pode usar ele onde quiser.
 
+Depois de fazer a busca pelo Aluno eu monto a *query* `{ _id: data.user_id }` para buscar o User correto adicionando-o em `data['user']` e finalmente executo o `callback`.
+
 **PRONTO!** Com esse código ele já irá popular seu User, retornando:
 
 ```js
@@ -1790,27 +1792,104 @@ Olhe que malandragem sapeca que faço com o `mongoose.model('User')`, isso é po
 }
 ```
 
+Agora como de praxe precisamo encapsular essa lógica do *populate* em uma função:
+
+```js
+const populate = (model, query, populateObj) => {
+  let doc = populateObj.base;
+  model
+    .findOne(query)
+    .lean()
+    .exec( (err, data) => {
+      doc[populateObj.ref] = data;
+      populateObj.cb(err, doc);
+    });
+};
+```
+
+Para não ficar com muitos parâmetros preferi encapsular 3 valores no objeto `populateObj`:
+
+```js
+const populateObj = {base: data, ref: 'user', cb: callback};
+```
+
+Juntando tudo ficou assim:
+
 ```js
 'use strict';
 const mongoose = require('mongoose');
 
+const populate = (model, query, populateObj) => {
+  let doc = populateObj.base;
+  model
+    .findOne(query)
+    .lean()
+    .exec( (err, data) => {
+      doc[populateObj.ref] = data;
+      populateObj.cb(err, doc);
+    });
+};
 module.exports = (Organism) => {
   return (obj, callback) => {
 
-    const populate = (model, query, base, toPopulate, cb) => {
-      model.findOne(query).lean().exec( (err, data) => {
-        base[toPopulate] = data;
-        callback(err, base);
-      });
-    };
-
-    let Aluno = {};
     Organism.findOne(obj).lean().exec( (err, data) => {
       if(err) return console.log('ERRO', err);
 
       const query = { _id: data.user_id };
-      populate(mongoose.model('User'), query, data, 'user', callback);
+      const populateObj = {base: data, ref: 'user', cb: callback};
+      populate(mongoose.model('User'), query, populateObj);
+    });
+  }
+};
+
+```
+
+Versão precisando de refatoramento:
+
+```js
+'use strict';
+const mongoose = require('mongoose');
+
+const populate = (model, query, populateObj) => {
+  let doc = populateObj.base;
+  model
+    .findOne(query)
+    .lean()
+    .exec( (err, data) => {
+      doc[populateObj.ref] = data;
+      populateObj.cb(err, doc);
+    });
+};
+module.exports = (Organism) => {
+  return (obj, callback) => {
+    // console.log('Organism paths', Organism.schema.paths)
+    let ref = false;
+    let refPath = false;
+    let _paths = Organism.schema.paths;
+    let arr = Object.keys(_paths).map( (key) => {return _paths[key]});
+    const findRef = (arr) => {
+      arr.forEach( (element, index) => {
+        if(element.options.ref) {
+          // ACHOU UMA REFERENCIA
+          ref = element.options.ref;
+          refPath = element.path;
+        }
+      });
+    };
+    findRef(arr);
+
+    const runPopulate = (data, ref, refPath) => {
+      const query = { _id: data[refPath] };
+      const populateObj = {base: data, ref: ref, path: refPath, cb: callback};
+      populate(mongoose.model('User'), query, populateObj);
+    };
+
+    Organism.findOne(obj).lean().exec( (err, data) => {
+      if(err) return console.log('ERRO', err);
+
+      if(ref) return runPopulate(data, ref, refPath);
     });
   }
 };
 ```
+
