@@ -407,35 +407,6 @@ module.exports = new Schema(Molecule);
 
 ### Testes
 
-**NÃO ESQUEÇA DE LIGAR O MONGODB E ADICIONAR O ARQUIVO `db.js` NA PASTA `config`!**
-
-```js
-const mongoose = require('mongoose');
-const dbURI = 'mongodb://localhost/modelo-padrao';
-
-mongoose.connect(dbURI);
-
-mongoose.connection.on('connected', function () {
-  console.log('Mongoose default connection connected to ' + dbURI);
-});
-mongoose.connection.on('error',function (err) {
-  console.log('Mongoose default connection error: ' + err);
-});
-mongoose.connection.on('disconnected', function () {
-  console.log('Mongoose default connection disconnected');
-});
-mongoose.connection.on('open', function () {
-  console.log('Mongoose default connection is open');
-});
-
-process.on('SIGINT', function() {
-  mongoose.connection.close(function () {
-    console.log('Mongoose default connection disconnected through app termination');
-    process.exit(0);
-  });
-});
-```
-
 Antes de passarmos os testes para Mocha/Chai vamos fazer um *script* bem simples para verificarmos o retorno das nossas moléculas.
 
 ```js
@@ -586,6 +557,36 @@ Tudo bem porque nesse caso eu quero que Curso não seja uma coleção própria e
 
 ### Ligação entre Moléculas
 
+**NÃO ESQUEÇA DE LIGAR O MONGODB E ADICIONAR O ARQUIVO `db.js` NA PASTA `config`!**
+
+```js
+const mongoose = require('mongoose');
+const dbURI = 'mongodb://localhost/modelo-padrao';
+
+mongoose.connect(dbURI);
+
+mongoose.connection.on('connected', function () {
+  console.log('Mongoose default connection connected to ' + dbURI);
+});
+mongoose.connection.on('error',function (err) {
+  console.log('Mongoose default connection error: ' + err);
+});
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose default connection disconnected');
+});
+mongoose.connection.on('open', function () {
+  console.log('Mongoose default connection is open');
+});
+
+process.on('SIGINT', function() {
+  mongoose.connection.close(function () {
+    console.log('Mongoose default connection disconnected through app termination');
+    process.exit(0);
+  });
+});
+```
+
+
 #### Aluno
 
 Refatorando essa molécula colocamos a chamada do átomo `cursoRef`:
@@ -622,7 +623,7 @@ const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
 const Organism = mongoose.model(MoleculeName, Molecule);
 
 const DNA = {
-  name: 'Suissa'
+  name: 'Be MEAN'
 , dateBegin: new Date('2016/06/20')
 , link: 'https://github.com/Webschool-io/be-mean-instagram'
 };
@@ -633,34 +634,66 @@ Cell.save((err, data) => {
   if(err) console.log('ERRO:', err);
   else console.log('RETORNO', data);
 })
-
 ```
 
 Executando esse código temos o seguinte:
 
 ```
- ➜ node crud/testMoleculeMongoDB.js 
-Cell { _id: 56f747955b319c936cbce9b4,
+➜ node crud/testMoleculeCurso.js
+Cell { _id: 56f749a040671ef66c55c031,
   link: 'https://github.com/Webschool-io/be-mean-instagram',
   dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
-  name: 'Suissa' }
+  name: 'Be MEAN' }
 Mongoose default connection connected to mongodb://localhost/modelo-padrao
 Mongoose default connection is open
-RETORNO { _id: 56f747955b319c936cbce9b4,
+RETORNO { _id: 56f749a040671ef66c55c031,
   link: 'https://github.com/Webschool-io/be-mean-instagram',
   dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
-  name: 'Suissa',
+  name: 'Be MEAN',
   __v: 0 }
+```
+
+Agora pegamos o `_id: 56f749a040671ef66c55c031` para passar esse valor em `cursos: ['56f749a040671ef66c55c031']`:
+
+```js
+require('./config/db');
+const mongoose = require('mongoose');
+const MoleculeName = 'Aluno';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase()+'Curso');
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+
+const DNA = {
+  name: 'Suissa'
+, dateBirth: new Date('1984/11/20')
+, cursos: ['56f749a040671ef66c55c031']
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+
+Cell.save((err, data) => {
+  if(err) console.log('ERRO:', err);
+  else console.log('RETORNO', data);
+})
 ```
 
 Testando:
 
 ```
-➜ node crud/testMolecule.js
-Cell { cursos: [ 56f73fdf62f069836b539673 ],
-  _id: 56f745090f26d9066ccf84af,
+➜ node crud/testMoleculeAluno.js
+Cell { cursos: [ 56f749a040671ef66c55c031 ],
+  _id: 56f749f4428681046d7c1d5c,
   dateBirth: 'Tue Nov 20 1984 00:00:00 GMT-0300 (BRT)',
   name: 'Suissa' }
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNO { cursos: [ 56f749a040671ef66c55c031 ],
+  _id: 56f749f4428681046d7c1d5c,
+  dateBirth: 'Tue Nov 20 1984 00:00:00 GMT-0300 (BRT)',
+  name: 'Suissa',
+  __v: 0 }
 ```
 
+Agora para continuar a testar as funcionalidades de uma Molécula precisamos criar seu Organismo.
 
+## Organismos

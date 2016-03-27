@@ -6,7 +6,7 @@ const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
 const Organism = mongoose.model(MoleculeName, Molecule);
 
 const DNA = {
-  name: 'Suissa'
+  name: 'Be MEAN'
 , dateBegin: new Date('2016/06/20')
 , link: 'https://github.com/Webschool-io/be-mean-instagram'
 };
