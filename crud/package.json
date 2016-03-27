@@ -1,0 +1,22 @@
+{
+  "name": "crud-modelo-padrao-atomic-design",
+  "version": "1.0.0",
+  "description": "CRUD do nosso Modelo Padrao de Atomic Design",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aomtic",
+    "design",
+    "modelo",
+    "padrao",
+    "mean",
+    "webschool"
+  ],
+  "author": "Suissa",
+  "license": "WTFPL",
+  "dependencies": {
+    "mongoose": "^4.4.10"
+  }
+}

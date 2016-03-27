@@ -1,5 +1,5 @@
 module.exports = {
   type: String
-, validate: require('./../hadrons/schoolNameValidateMongoose')
+// , validate: require('./../hadrons/schoolNameValidateMongoose')
 , required: true
 }

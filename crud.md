@@ -355,7 +355,7 @@ const Schema = mongoose.Schema;
 const Curso = require('./curso');
 
 const Molecule = {
-  name: require('./../atoms/name');
+  name: require('./../atoms/name')
 , dateBirth: require('./../atoms/dateBirth')
 , cursos: [Curso]
 }
@@ -376,11 +376,291 @@ const Schema = mongoose.Schema;
 const Curso = require('./curso');
 
 const Molecule = {
-  name: require('./../atoms/name');
+  name: require('./../atoms/name')
 , dateBegin: require('./../atoms/dateBegin')
 , link: require('./../atoms/link')
 }
 
 module.exports = new Schema(Molecule);
 ```
+
 ### Professor
+
+- Professor
+    + name
+    + schoolName
+    + cursos
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Curso = require('./curso');
+
+const Molecule = {
+  name: require('./../atoms/name')
+, schoolName: require('./../atoms/schoolName')
+, cursos: [Curso]
+}
+
+module.exports = new Schema(Molecule);
+```
+
+### Testes
+
+**NÃO ESQUEÇA DE LIGAR O MONGODB E ADICIONAR O ARQUIVO `db.js` NA PASTA `config`!**
+
+```js
+const mongoose = require('mongoose');
+const dbURI = 'mongodb://localhost/modelo-padrao';
+
+mongoose.connect(dbURI);
+
+mongoose.connection.on('connected', function () {
+  console.log('Mongoose default connection connected to ' + dbURI);
+});
+mongoose.connection.on('error',function (err) {
+  console.log('Mongoose default connection error: ' + err);
+});
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose default connection disconnected');
+});
+mongoose.connection.on('open', function () {
+  console.log('Mongoose default connection is open');
+});
+
+process.on('SIGINT', function() {
+  mongoose.connection.close(function () {
+    console.log('Mongoose default connection disconnected through app termination');
+    process.exit(0);
+  });
+});
+```
+
+Antes de passarmos os testes para Mocha/Chai vamos fazer um *script* bem simples para verificarmos o retorno das nossas moléculas.
+
+```js
+const mongoose = require('mongoose');
+const MoleculeName = ''; // coloque o nome aqui, ex.: User
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
+const DNA = {}; // Coloque os valores para os campos do Schema
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+const Cell = new Organism(DNA);
+
+console.log('Cell', Cell);
+```
+
+#### User
+
+```js
+const mongoose = require('mongoose');
+const MoleculeName = 'User';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+
+const DNA = {
+  email: 'suiss@webschool.io'
+, password: 'sdhu889h89d'
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+```
+
+Executando:
+
+```
+➜ node crud/testMolecule.js
+Cell { _id: 56f73e785056af5c6b18c754,
+  password: 'sdhu889h89d',
+  email: 'suiss@webschool.io' }
+```
+
+#### Aluno
+
+```js
+const mongoose = require('mongoose');
+const MoleculeName = 'Aluno';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+
+const DNA = {
+  name: 'Suissa'
+, dateBirth: new Date('1984/11/20')
+, cursos: [
+    {
+      name: 'Be MEAN'
+    , dateBegin: new Date('2016/06/20')
+    , link: 'https://github.com/Webschool-io/be-mean-instagram'
+    }
+  ]
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+```
+
+Executando:
+
+```
+(Node-Atomic-Design-Modelo-Padrao) ➜ (git:(master) ✗) ➜ node crud/testMolecule.js
+Cell { cursos: 
+   [ { _id: 56f73ed1f1887a696b116248,
+       link: 'https://github.com/Webschool-io/be-mean-instagram',
+       dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+       name: 'Be MEAN' } ],
+  _id: 56f73ed1f1887a696b116247,
+  dateBirth: 'Tue Nov 20 1984 00:00:00 GMT-0300 (BRT)',
+  name: 'Suissa' }
+```
+
+
+#### Curso
+
+```js
+const mongoose = require('mongoose');
+const MoleculeName = 'Curso';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+
+const DNA = {
+  name: 'Suissa'
+, dateBegin: new Date('2016/06/20')
+, link: 'https://github.com/Webschool-io/be-mean-instagram'
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+```
+
+Executando:
+
+```
+➜ node crud/testMolecule.js
+Cell { _id: 56f73f72628911766b07ac90,
+  link: 'https://github.com/Webschool-io/be-mean-instagram',
+  name: 'Suissa' }
+
+```
+
+
+#### Professor
+
+```js
+const mongoose = require('mongoose');
+const MoleculeName = 'Aluno';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+
+const DNA = {
+  name: 'Suissa'
+, dateBirth: new Date('1984/11/20')
+, cursos: [
+    {
+      name: 'Be MEAN'
+    , dateBegin: new Date('2016/06/20')
+    , link: 'https://github.com/Webschool-io/be-mean-instagram'
+    }
+  ]
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+```
+
+Executando:
+
+```
+➜ node crud/testMolecule.js
+Cell { cursos: 
+   [ { _id: 56f73fdf62f069836b539673,
+       link: 'https://github.com/Webschool-io/be-mean-instagram',
+       dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+       name: 'Be MEAN' } ],
+  _id: 56f73fdf62f069836b539672,
+  name: 'Suissa' }
+
+```
+
+Tudo bem porque nesse caso eu quero que Curso não seja uma coleção própria e sempre esteja dentro de Aluno e Professor, mas caso eu tenha uma escola com certeza será melhor separarmos essa coleção.
+
+### Ligação entre Moléculas
+
+#### Aluno
+
+Refatorando essa molécula colocamos a chamada do átomo `cursoRef`:
+
+```js
+module.exports = (Schema) => {
+  return { type: Schema.Types.ObjectId, ref: 'cursos' };
+};
+```
+
+Ficando assim:
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const Molecule = {
+  name: require('./../atoms/name')
+, dateBirth: require('./../atoms/dateBirth')
+, cursos: [ require('./../atoms/cursoRef')(Schema) ]
+}
+
+module.exports = new Schema(Molecule);
+```
+
+Então antes eu vou inserir o Curso:
+
+```js
+require('./config/db');
+const mongoose = require('mongoose');
+const MoleculeName = 'Curso';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
+
+const Organism = mongoose.model(MoleculeName, Molecule);
+
+const DNA = {
+  name: 'Suissa'
+, dateBegin: new Date('2016/06/20')
+, link: 'https://github.com/Webschool-io/be-mean-instagram'
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+
+Cell.save((err, data) => {
+  if(err) console.log('ERRO:', err);
+  else console.log('RETORNO', data);
+})
+
+```
+
+Executando esse código temos o seguinte:
+
+```
+ ➜ node crud/testMoleculeMongoDB.js 
+Cell { _id: 56f747955b319c936cbce9b4,
+  link: 'https://github.com/Webschool-io/be-mean-instagram',
+  dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+  name: 'Suissa' }
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNO { _id: 56f747955b319c936cbce9b4,
+  link: 'https://github.com/Webschool-io/be-mean-instagram',
+  dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+  name: 'Suissa',
+  __v: 0 }
+```
+
+Testando:
+
+```
+➜ node crud/testMolecule.js
+Cell { cursos: [ 56f73fdf62f069836b539673 ],
+  _id: 56f745090f26d9066ccf84af,
+  dateBirth: 'Tue Nov 20 1984 00:00:00 GMT-0300 (BRT)',
+  name: 'Suissa' }
+```
+
+
