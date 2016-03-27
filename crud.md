@@ -697,3 +697,281 @@ RETORNO { cursos: [ 56f749a040671ef66c55c031 ],
 Agora para continuar a testar as funcionalidades de uma Molécula precisamos criar seu Organismo.
 
 ## Organismos
+
+É nessa etapa onde iremos definir quais Organelas/Ações nosso Organismo terá, como padrão **TODOS TERÃO UM CRUD**.
+
+### Organelas
+
+Nossas organelas/ações do CRUD são:
+
+- create
+- find
+- findOne
+- update
+- remove
+
+Porém antes de tudo vamos definir um *callback* padrão para as Organelas:
+
+#### callback
+
+```js
+'use strict';
+
+module.exports = (err, data) => {
+  if (err) console.log('Erro:', err);
+  else console.log('RETORNOU:', data);
+};
+```
+
+Depois disso podemos criar as funções do CRUD, para isso usaremos para essas funções as mesma **interface** das funções do Mongoose.
+
+#### create
+
+Nessa função recebemos em `obj` qual o objeto a ser cadastrado.
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (obj, callback) => Organism.create(obj, callback);
+};
+```
+
+#### find
+
+Nessa função recebemos em `obj` o objeto com a *query* da nossa busca.
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (obj, callback) => Organism.find(obj, callback);
+};
+```
+
+#### findOne
+
+Nessa função recebemos em `obj` o objeto com a *query* da nossa busca.
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (obj, callback) => Organism.findOne(obj, callback);
+};
+```
+
+#### update
+
+Nessa função recebemos em `obj` o objeto com a *query* da nossa busca, em `mod` o objeto com os valores a serem mudados, em `options` o objeto se a alteração terá: `upsert` e/ou `multi`.
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (obj, mod, options, callback) => Organism.update(obj, mod, options, callback);
+};
+```
+
+#### remove
+
+Nessa função recebemos em `obj` o objeto com o valor da *query* da busca, para que a Entidade seja removida.
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (obj, callback) => Organism.remove(obj, callback);
+};
+```
+
+Agora vamos testar essas Organelas/Ações.
+
+#### create - Testando
+
+E para verificar esse código fazemos:
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const callback = require('./organisms/organelles/callback');
+const obj = {
+  email: 'suissa@webshool.io'
+, password: 'Bazingueiro666'
+}
+
+Organism.create(obj, callback);
+```
+
+```
+➜ node testOrganismCreate.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { _id: 56f75f7bc7a357337142a293,
+  password: 'Bazingueiro666',
+  email: 'suissa@webshool.io',
+  __v: 0 }
+
+```
+
+#### find - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const callback = require('./organisms/organelles/callback');
+const query = {_id: '56f75f7bc7a357337142a293'}
+
+Organism.find(query, callback);
+```
+
+```
+➜ node testOrganismFind.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: [ { __v: 0,
+    password: 'Bazingueiro666',
+    email: 'suissa@webshool.io',
+    _id: 56f75f7bc7a357337142a293 } ]
+```
+
+Perceba que ele retornou apenas 1 User, passado pelo `_id`, porém vem como *Array* e isso sabemos muito bem o porquê, né?
+
+#### findOne - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const callback = require('./organisms/organelles/callback');
+const query = {_id: '56f75f7bc7a357337142a293'}
+
+Organism.findOne(query, callback);
+```
+
+```
+➜ node testOrganismFind.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { __v: 0,
+    password: 'Bazingueiro666',
+    email: 'suissa@webshool.io',
+    _id: 56f75f7bc7a357337142a293 }
+```
+
+#### update - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const query = {_id: '56f75f7bc7a357337142a293'}
+const mod = {password: 'MudeiAquiMalandro'}
+const options = {};
+const callback = require('./organisms/organelles/callback');
+
+Organism.update(query, mod, options, callback);
+```
+
+```
+➜ node testOrganismUpdate.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { ok: 1, nModified: 1, n: 1 }
+```
+
+#### remove - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const query = {_id: '56f75f7bc7a357337142a293'}
+const callback = require('./organisms/organelles/callback');
+
+Organism.remove(query, mod, options, callback);
+```
+
+```
+➜ node testOrganismRemove.js 
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { result: { ok: 1, n: 1 },
+  connection: 
+   EventEmitter {
+     domain: null,
+     _events: 
+      { close: [Object],
+        error: [Object],
+        timeout: [Object],
+        parseError: [Object],
+        connect: [Function] },
+     _eventsCount: 5,
+     _maxListeners: undefined,
+     options: 
+      { socketOptions: {},
+        auto_reconnect: true,
+        host: 'localhost',
+        port: 27017,
+        cursorFactory: [Object],
+        reconnect: true,
+        emitError: true,
+        size: 5,
+        disconnectHandler: [Object],
+        bson: {},
+        messageHandler: [Function],
+        wireProtocolHandler: {} },
+     id: 0,
+     logger: { className: 'Connection' },
+     bson: {},
+```
+
+Sim é esse mesmo o retorno do `remove`, infelizmente o MongoDB mudou esse retorno nas versões acima da `3.0`, por isso devemos criar um *callback* mais específico para essa Organela, algo bem simples como isso:
+
+```js
+'use strict';
+
+module.exports = (err, data) => {
+  if (err) console.log('Erro:', err);
+  else console.log('RETORNOU:', data.result);
+};
+```
+
+**Devemos criar 1 *callback* específico para cada tipo de ação pois o que ele irá fazer pode ser diferente de uma para outra.**
+
+### User
+
+Depois da definição das Organelas do CRUD agora podemos criar nossos Organismos.
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const Molecule = require('./../molecules/user');
+const Organism = mongoose.model('User', Molecule);
+
+const create = require('./organelles/create')(Organism);
+const find = require('./organelles/find')(Organism);
+const findOne = require('./organelles/findOne')(Organism);
+const update = require('./organelles/update')(Organism);
+const remove = require('./organelles/remove')(Organism);
+
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+

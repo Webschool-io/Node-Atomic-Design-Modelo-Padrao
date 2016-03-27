@@ -1,3 +1,4 @@
-const Molecule = require('./molecules/aluno');
+const Organism = require('./organisms/user');
 
-console.log('Molecule', Molecule);
+console.log('Organism', Organism);
+process.exit(0);
