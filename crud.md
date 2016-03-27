@@ -785,6 +785,35 @@ module.exports = (Organism) => {
 };
 ```
 
+### User
+
+Depois da definição das Organelas do CRUD agora podemos criar nossos Organismos.
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const Molecule = require('./../molecules/user');
+const Organism = mongoose.model('User', Molecule);
+
+const create = require('./organelles/create')(Organism);
+const find = require('./organelles/find')(Organism);
+const findOne = require('./organelles/findOne')(Organism);
+const update = require('./organelles/update')(Organism);
+const remove = require('./organelles/remove')(Organism);
+
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+
 Agora vamos testar essas Organelas/Ações.
 
 #### create - Testando
@@ -945,33 +974,3 @@ module.exports = (err, data) => {
 ```
 
 **Devemos criar 1 *callback* específico para cada tipo de ação pois o que ele irá fazer pode ser diferente de uma para outra.**
-
-### User
-
-Depois da definição das Organelas do CRUD agora podemos criar nossos Organismos.
-
-```js
-'use strict';
-
-const mongoose = require('mongoose');
-const Molecule = require('./../molecules/user');
-const Organism = mongoose.model('User', Molecule);
-
-const create = require('./organelles/create')(Organism);
-const find = require('./organelles/find')(Organism);
-const findOne = require('./organelles/findOne')(Organism);
-const update = require('./organelles/update')(Organism);
-const remove = require('./organelles/remove')(Organism);
-
-const Cell = {
-  create
-, find
-, findOne
-, update
-, remove
-};
-
-module.exports = Cell;
-```
-
-
