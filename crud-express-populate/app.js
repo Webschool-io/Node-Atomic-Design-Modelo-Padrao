@@ -1,6 +1,6 @@
 'use strict';
 
-require('./config/db');
+require('./config/dbModels');
 
 const express = require('express');
 const path = require('path');

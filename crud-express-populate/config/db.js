@@ -24,6 +24,3 @@ process.on('SIGINT', function() {
     process.exit(0);
   });
 });
-
-let Molecule = require('../modules/Curso/molecules/curso');
-mongoose.model('Curso', Molecule);

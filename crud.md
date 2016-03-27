@@ -1711,3 +1711,13 @@ module.exports = router;
 **Muito melhor e mais legível não??**
 
 ![YEAH](https://media.giphy.com/media/fLK0eUlYZoB6E/giphy.gif)
+
+Agora basta que façamos a mesma coisa para as outras entidades.
+
+Tudo muito simples e fácil até agora, né?
+
+Pois então, tenho péssimas notícias para você:
+
+> Precisamos **REFATORAR!**
+
+Precisamos refatorar pois ainda não implementamos o [populate]() do Mongoose, que também já foi explicado em aulas passadas.

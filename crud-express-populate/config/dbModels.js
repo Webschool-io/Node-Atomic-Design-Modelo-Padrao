@@ -1,5 +1,3 @@
-'use strict';
-
 const mongoose = require('mongoose');
 const dbURI = 'mongodb://localhost/modelo-padrao';
 
@@ -25,5 +23,8 @@ process.on('SIGINT', function() {
   });
 });
 
-let Molecule = require('../modules/Curso/molecules/curso');
-mongoose.model('Curso', Molecule);
+
+mongoose.model('Curso', require('../modules/Curso/molecules/curso'));
+mongoose.model('User', require('../modules/User/molecules/user'));
+mongoose.model('Aluno', require('../modules/Aluno/molecules/alunoCurso'));
+mongoose.model('Professor', require('../modules/Professor/molecules/professorCurso'));
