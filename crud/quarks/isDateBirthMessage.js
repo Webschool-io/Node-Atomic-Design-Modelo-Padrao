@@ -1,1 +1,1 @@
-module.exports = 'O nome {VALUE} precisa ter tamanho maior que 3 e menor que 80!';
+module.exports = 'A data de nascimento {VALUE} precisa ser antes de hoje!';

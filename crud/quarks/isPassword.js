@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = (value) => {
-  const isEmpty = require('../isEmpty/isEmpty')(value);
-  const isString = require('../isString/isString')(value);
+  const isEmpty = require('./isEmpty')(value);
+  const isString = require('./isString')(value);
 
   if(isEmpty) return false;
   if(!isString) return false;

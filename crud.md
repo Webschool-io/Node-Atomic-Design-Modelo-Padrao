@@ -18,7 +18,7 @@ Então vamos definir agora os campos necessários para cada:
     + name
     + dateBirth
     + cursos
-- Cursos
+- Curso
     + name
     + dateBegin
     + link
@@ -85,14 +85,12 @@ module.exports = {
 }
 ```
 
-### curso
-
-Em vez de cursos o nome do átomo é **curso** no singular, cursos será o *Array* contando 1 ou mais `curso`.
+### link
 
 ```js
 module.exports = {
   type: String
-, validate: require('./../hadrons/cursoValidateMongoose')
+, validate: require('./../hadrons/linkValidateMongoose')
 , required: true
 }
 ```
@@ -250,32 +248,139 @@ module.exports = (value) => {
 module.exports = 'O nome {VALUE} precisa ter tamanho maior que 3 e menor que 80!';
 ```
 
+### isLink
+
+```js
+'use strict';
+
+module.exports = (value) => {
+  const regex = /(https?:\/\/(?:www\.|(?!www))?[^\s\.]+\.[^\s]{2,}|\.[^\s]{2,})/i;
+  const isEmpty = require('./isEmpty')(value);
+  const isString = require('./isString')(value);
+
+  if(isEmpty) return false;
+  if(!isString) return false;
+
+  return regex.test(value);
+}
+```
+
+### isLinkMessage
+
+```js
+module.exports = 'O link {VALUE} não é válido!';
+```
+
 ### isDateBirth
 
 ```js
 'use strict';
 
 module.exports = (value) => {
-  const isEmpty = require('../isEmpty/isEmpty')(value);
-  const isDate = require('../isDate/isDate')(value);
+  const isEmpty = require('./isEmpty')(value);
+  const isDate = require('./isDate')(value);
 
   if(isEmpty) return false;
   if(!isDate) return false;
-
-  return true;
-}
+  // Data precisa ser maior que a data atual
+  const today = new Date();
+  return value.setHours(0,0,0,0) < today.setHours(0,0,0,0);
+};
 ```
 
 ### isDateBirthMessage
 
 ```js
-module.exports = 'O nome {VALUE} precisa ter tamanho maior que 3 e menor que 80!';
+module.exports = 'A data de nascimento {VALUE} precisa ser antes de hoje!';
 ```
 
+### isDateBegin
+
+```js
+'use strict';
+
+module.exports = (value) => {
+  const isEmpty = require('./isEmpty')(value);
+  const isDate = require('./isDate')(value);
+
+  if(isEmpty) return false;
+  if(!isDate) return false;
+  // Data precisa ser maior que a data atual
+  const today = new Date();
+  return value.setHours(0,0,0,0) > today.setHours(0,0,0,0);
+};
+```
+
+### isDateBeginMessage
+
+```js
+module.exports = 'A data de início {VALUE} precisa ser depois de hoje!';
+```
+
+Depois de terminado nossos Quarks, podemos partir para as Moléculas, parece estranho, né?
+
+Só não começamos dirtamente com os Quarks ou Hádrons pois antes precisamos saber quais são os Átomos que os utilizam e para saber quais são os Átomos sempre listamos eles a partir de sua Entidade/Molécula.
 
 ## Moléculas
 
+Na etapa da definição das Moléculas é onde criamos os Schemas no Mongoose.
+
 ### User
+
+- User
+    + email
+    + password
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Molecule = {
+  email: require('./../atoms/email')
+, password: require('./../atoms/password')
+}
+
+module.exports = new Schema(Molecule);
+```
+
 ### Aluno
-### Cursos
+
+- Aluno
+    + name
+    + dateBirth
+    + cursos
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Curso = require('./curso');
+
+const Molecule = {
+  name: require('./../atoms/name');
+, dateBirth: require('./../atoms/dateBirth')
+, cursos: [Curso]
+}
+
+module.exports = new Schema(Molecule);
+```
+
+### Curso
+
+- Curso
+    + name
+    + dateBegin
+    + link
+
+```js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Curso = require('./curso');
+
+const Molecule = {
+  name: require('./../atoms/name');
+, dateBegin: require('./../atoms/dateBegin')
+, link: require('./../atoms/link')
+}
+
+module.exports = new Schema(Molecule);
+```
 ### Professor
