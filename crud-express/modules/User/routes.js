@@ -3,22 +3,16 @@
 const express = require('express');
 const router = express.Router();
 const Organism = require('./organisms/user');
-const callback = require('./brain')(Organism);
+const Create = require('./brainCreate')(Organism);
+const Find = require('./brainFind')(Organism);
+const FindOne = require('./brainFindOne')(Organism);
+const Update = require('./brainUpdate')(Organism);
+const Remove = require('./brainRemove')(Organism);
 
-router.get('/', callback);
-// router.get('/:id', (req, res) => {
-  
-// });
+router.get('/', Find);
+router.get('/:id', FindOne);
+router.post('/', Create);
+router.put('/:id', Update);
+router.delete('/:id', Remove);
 
-// router.post('/', (req, res) => {
-  
-// });
-
-// router.put('/:id', (req, res) => {
-  
-// });
-
-// router.delete('/:id', (req, res) => {
-  
-// });
 module.exports = router;

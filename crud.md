@@ -1494,7 +1494,7 @@ const Organism = require('./organisms/user');
 router.get('/', (req, res) => {
   let obj = req.body;
   let callback = (err, data, req, res) => {
-    if (err) return console.log('Erro:', err);
+    if (err) res.json(err);
     res.json(data);
   };
 
@@ -1505,7 +1505,17 @@ router.get('/', (req, res) => {
 module.exports = router;
 ```
 
-Claro que não deixaremos dessa forma, refatorando ficará assim:
+Claro que não deixaremos dessa forma, primeiramente retiramos o `callback`:
+
+```js
+// callbackExpress.js
+'use strict';
+
+module.exports = (err, data, res) => {
+  if (err) return console.log('Erro:', err);
+  res.json(data);
+};
+```
 
 ```js
 'use strict';
@@ -1525,7 +1535,7 @@ router.get('/', (req, res) => {
 module.exports = router;
 ```
 
-Porém mesmo assim ainda temos lógica nessa função da rota, a qual deve somente executar uma ação, para conseguirmos retirar toda a lógica da rota precisaremos criar um *Controller* (**que eu chamarei por hora de BRAIN**).
+Porém mesmo assim ainda temos lógica nessa função da rota, a qual deve somente executar uma ação, para conseguirmos retirar toda a lógica da rota precisaremos criar um *Controller* (**que eu chamarei por hora de brainFind**).
 
 ```js
 'use strict';
@@ -1554,10 +1564,10 @@ Para usar esse módulo é **MUITOOOOO SIMPLES**, *confira comigo no REPLAYYY*:
 const express = require('express');
 const router = express.Router();
 const Organism = require('./organisms/user');
-const callback = require('./brain')(Organism);
+const callbackFind = require('./brain')(Organism);
 
 router.get('/', (req, res) => {
-  callback(req, res);
+  callbackFind(req, res);
 });
 module.exports = router;
 ```
@@ -1580,5 +1590,124 @@ router.get('/', (req, res) => {
 module.exports = router;
 ```
 
+Eu posso criar o módulo `brain` como um *Mediator* de callbacks, todavia iremos inicialmente criar 1 módulo desses para cada função do CRUD:
 
+```js
+// brainCreate.js
+'use strict';
 
+module.exports = (Organism) => {
+
+  const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+  return (req, res) => {
+    let obj = req.body;
+    Organism.create(obj, (err, data) => {
+      callbackExpress(err, data, res);
+    });
+  };
+};
+```
+
+```js
+// brainFind.js
+'use strict';
+
+module.exports = (Organism) => {
+
+  const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+  return (req, res) => {
+    let obj = req.body;
+
+    Organism.find(obj, (err, data) => {
+      callbackExpress(err, data, res);
+    });
+  };
+};
+```
+
+```js
+// brainFindOne.js
+'use strict';
+
+module.exports = (Organism) => {
+
+  const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+  return (req, res) => {
+    let query = { _id: req.params.id };
+
+    Organism.findOne(query, (err, data) => {
+      callbackExpress(err, data, res);
+    });
+  };
+};
+```
+
+```js
+// brainUpdate.js
+'use strict';
+
+module.exports = (Organism) => {
+
+  const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+  return (req, res) => {
+    let query = { _id: req.params.id };
+    let mod = req.body;
+    let options = { runValidators: true };
+
+    Organism.update(query, mod, options, (err, data) => {
+      callbackExpress(err, data, res);
+    });
+  };
+};
+```
+
+No `brainUpdate` precisei passar `options = { runValidators: true }` para que o Mongoose execute a validação também na hora de alterar.
+
+```js
+// brainRemove.js
+'use strict';
+
+module.exports = (Organism) => {
+
+  const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+  return (req, res) => {
+    let query = { _id: req.params.id };
+
+    Organism.remove(query, (err, data) => {
+      callbackExpress(err, data, res);
+    });
+  };
+};
+```
+
+Veja como irá ficar nosso `routes.js` com essas mudanças:
+
+```js
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+const Organism = require('./organisms/user');
+const Create = require('./brainCreate')(Organism);
+const Find = require('./brainFind')(Organism);
+const FindOne = require('./brainFindOne')(Organism);
+const Update = require('./brainUpdate')(Organism);
+const Remove = require('./brainRemove')(Organism);
+
+router.get('/', Find);
+router.get('/:id', FindOne);
+router.post('/', Create);
+router.put('/:id', Update);
+router.delete('/:id', Remove);
+
+module.exports = router;
+```
+
+**Muito melhor e mais legível não??**
+
+![YEAH](https://media.giphy.com/media/fLK0eUlYZoB6E/giphy.gif)

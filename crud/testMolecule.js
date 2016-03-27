@@ -3,33 +3,20 @@
 require('./config/db');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const MoleculeName = 'Aluno';
-const Molecule = require('./molecules/'+MoleculeName.toLowerCase()+'Curso');
+const MoleculeName = 'User';
+const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
 
 const Organism = mongoose.model(MoleculeName, Molecule);
 
-const CursoSchema = {
-  name: require('./atoms/name')
-, dateBegin: require('./atoms/dateBegin')
-, link: require('./atoms/link')
-}
-
-const Curso = new Schema(CursoSchema);
-const CursoModel = mongoose.model('Curso',Curso);
-
-// const Curso = require('./molecules/curso');
-// const OrganismCurso = mongoose.model('Curso', Curso);
-
-let Aluno = {};
-const query = { _id: '56f749f4428681046d7c1d5c' };
+const query = { _id: '56f75e0c822a32b4704567bf' };
 
 
-// const cb = (err, data) => {
-//   if(err) console.log('ERRO:', err);
-//   else console.log('RETORNo:', data);
-// };
+const cb = (err, data) => {
+  if(err) console.log('ERRO:', err);
+  else console.log('RETORNo:', data);
+};
 
-// Organism.findOne({}).populate('cursos').exec(cb);
+Organism.update(query, {email: ''}, cb);
 
 
 // const populateAluno = (err, data) => {
