@@ -1721,3 +1721,96 @@ Pois então, tenho péssimas notícias para você:
 > Precisamos **REFATORAR!**
 
 Precisamos refatorar pois ainda não implementamos o [populate]() do Mongoose, que também já foi explicado em aulas passadas.
+
+Entretanto como eu sou ruim eu vou ensinar a implementarmos nosso próprio populate, vamos iniciar na Organela/Ação `findOne`:
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (query, callback) => Organism.findOne(query, callback);
+};
+```
+
+Primeira coisa que precisamos fazer é modificar o `findOne` desse jeito:
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+  return (query, callback) => Organism.findOne(query).lean().exec(callback);
+};
+```
+
+Precisamos utilizar o [`lean()`](http://mongoosejs.com/docs/api.html#query_Query-lean) pois ele transforma o retorno em um JSON puro em vez de retornar um [MongooseDocument](http://mongoosejs.com/docs/api.html#document-js) e isso será necessário para que possamos modificar os objetos diretamente.
+
+Agora vamos modificar o `exec()` para adicionar nossa lógica do *populate*:
+
+```js
+'use strict';
+const mongoose = require('mongoose');
+
+module.exports = (Organism) => {
+  return (query, callback) => {
+
+    Organism
+      .findOne(query)
+      .lean()
+      .exec( (err, data) => {
+        if(err) return console.log('ERRO', err);
+
+        mongoose.model('User')
+          .findOne({ _id: data.user_id })
+          .lean()
+          .exec( (err, sub) => {
+            data['user'] = sub;
+            callback(err, data);
+          });
+      });
+  }
+};
+```
+
+Olhe que malandragem sapeca que faço com o `mongoose.model('User')`, isso é possível pois o *Model* é um *Singleton* "global", ou seja, você só pode criar ele 1 vez e depois pode usar ele onde quiser.
+
+**PRONTO!** Com esse código ele já irá popular seu User, retornando:
+
+```js
+{
+    "_id": "56f7d79820475b3884c127e2",
+    "user_id": "56f7b8f45a1bd68b7871640f",
+    "name": "Suissera",
+    "__v": 0,
+    "user": {
+        "_id": "56f7b8f45a1bd68b7871640f",
+        "email": "macio@sedoso.com",
+        "password": "tetinhaMacia666",
+        "__v": 0
+    }
+}
+```
+
+```js
+'use strict';
+const mongoose = require('mongoose');
+
+module.exports = (Organism) => {
+  return (obj, callback) => {
+
+    const populate = (model, query, base, toPopulate, cb) => {
+      model.findOne(query).lean().exec( (err, data) => {
+        base[toPopulate] = data;
+        callback(err, base);
+      });
+    };
+
+    let Aluno = {};
+    Organism.findOne(obj).lean().exec( (err, data) => {
+      if(err) return console.log('ERRO', err);
+
+      const query = { _id: data.user_id };
+      populate(mongoose.model('User'), query, data, 'user', callback);
+    });
+  }
+};
+```
