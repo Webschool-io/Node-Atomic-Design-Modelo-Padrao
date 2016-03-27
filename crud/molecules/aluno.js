@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 const Curso = require('./curso');
 
 const Molecule = {
-  name: require('./../atoms/name')
+  user_id: require('./../atoms/userRef')(Schema)
+, name: require('./../atoms/name')
 , dateBirth: require('./../atoms/dateBirth')
 , cursos: [Curso]
 }

@@ -349,13 +349,23 @@ module.exports = new Schema(Molecule);
     + dateBirth
     + cursos
 
+Porém sabemos que o Aluno também é um 1 User, então se quisermos referenciar a coleção de Users precisamos criar esse átomo:
+
+```js
+// atoms/userRef.js
+module.exports = (Schema) => {
+  return { type: Schema.Types.ObjectId, ref: 'users' };
+};
+```
+
 ```js
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Curso = require('./curso');
 
 const Molecule = {
-  name: require('./../atoms/name')
+  user_id: require('./../atoms/userRef')(Schema)
+, name: require('./../atoms/name')
 , dateBirth: require('./../atoms/dateBirth')
 , cursos: [Curso]
 }
@@ -813,7 +823,6 @@ const Cell = {
 module.exports = Cell;
 ```
 
-
 Agora vamos testar essas Organelas/Ações.
 
 #### create - Testando
@@ -974,3 +983,123 @@ module.exports = (err, data) => {
 ```
 
 **Devemos criar 1 *callback* específico para cada tipo de ação pois o que ele irá fazer pode ser diferente de uma para outra.**
+
+### Curso
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const Molecule = require('./../molecules/curso');
+const Organism = mongoose.model('Curso', Molecule);
+
+const create = require('./organelles/create')(Organism);
+const find = require('./organelles/find')(Organism);
+const findOne = require('./organelles/findOne')(Organism);
+const update = require('./organelles/update')(Organism);
+const remove = require('./organelles/remove')(Organism);
+
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+#### create - Testando
+
+Irei cadastrar sem Cursos por hora.
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/curso');
+const callback = require('./organisms/organelles/callback');
+const obj = {
+  name: 'JS Funcional'
+, dateBegin: Date('2016/05/20')
+, link: 'https://github.com/Webschool-io/workshop-js-funcional-free'
+}
+
+Organism.create(obj, callback);
+
+```
+
+```
+ ➜ node testOrganismCreate.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { _id: 56f76ee8053c543373ad29ef,
+  link: 'https://github.com/Webschool-io/workshop-js-funcional-free',
+  dateBegin: 'Sun Mar 27 2016 02:26:00 GMT-0300 (BRT)',
+  name: 'JS Funcional',
+  __v: 0 }
+```
+
+
+
+
+### Aluno
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const Molecule = require('./../molecules/aluno');
+const Organism = mongoose.model('Aluno', Molecule);
+
+const create = require('./organelles/create')(Organism);
+const find = require('./organelles/find')(Organism);
+const findOne = require('./organelles/findOne')(Organism);
+const update = require('./organelles/update')(Organism);
+const remove = require('./organelles/remove')(Organism);
+
+const Cell = {
+  create
+, find
+, findOne
+, update
+, remove
+};
+
+module.exports = Cell;
+```
+
+#### create - Testando
+
+Irei cadastrar sem Cursos por hora.
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/aluno');
+const callback = require('./organisms/organelles/callback');
+const obj = {
+  user_id: '56f760cb94e41479715ff29f'
+, name: 'Suissa Aluno'
+, dateBirth: Date('1984/11/20')
+}
+
+Organism.create(obj, callback);
+```
+
+```
+ ➜ node testOrganismCreate.js
+RETORNOU: { cursos: [],
+  _id: 56f76d35c949c9137395d49a,
+  dateBirth: 'Sun Mar 27 2016 02:18:45 GMT-0300 (BRT)',
+  name: 'Suissa Aluno',
+  user_id: 56f760cb94e41479715ff29f,
+  __v: 0 }
+```
+
+
+## Express
+
+
