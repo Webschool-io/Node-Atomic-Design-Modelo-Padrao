@@ -2008,3 +2008,101 @@ Porém ainda está muito feio esse código então bora...
 
 #### Populate manual refatoração
 
+Primeiramente vamos separar em outro módulo a criação daquele nosso *Array* em cima dos `schema.paths`:
+
+```js
+// modules/helpers/prepareDocMongoose
+'use strict';
+module.exports = (Organism) => {
+  let _paths = Organism.schema.paths;
+  return Object.keys(_paths).map( (key) => _paths[key]);
+};
+```
+
+Usamos assim: `const arr = require('../../../helpers/prepareDocMongoose')(Organism);` para passar esse `arr` para o módulo, que faremos agora, que pesquisa se existe referências:
+
+```js
+// modules/helpers/findRefMongoose
+'use strict';
+module.exports = (arr) => {
+  let Ref = {};
+  arr.forEach( (element, index) => {
+    if(element.options.ref) {
+      // ACHOU UMA REFERENCIA
+      Ref.ref = element.options.ref;
+      Ref.path = element.path;
+    }
+  });
+  return Ref;
+};
+```
+
+E usamos: `const Refs = require('../../../helpers/findRefMongoose')(arr)`.
+
+Para agora criarmos o módulo que irá popular realmente:
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const populate = require('./populateMongoose');
+
+module.exports = {
+  run: (data, Refs, cb) => {
+    const query = { _id: data[Refs.path] };
+    const populateObj = {base: data, ref: Refs.ref, path: Refs.path, cb: cb};
+
+    populate.run(mongoose.model('User'), query, populateObj);
+  }
+};
+```
+
+Porém perceba que ainda estamos definindo `mongoose.model('User')` manualmente, precisamos criar uma lógica para conseguir esse valor do *Schema*, podemos pegar de `Refs.ref` o valor `users` que é o nome da coleção.
+
+Como já sabemos o Mongoose pluraliza o nome do seu *Model*(User) e deixa tudo em minúscula, bom então para esse caso basta pegarmos `users`, deixar a primeira letra maiúscula e retirar o `s`
+
+```js
+let nameSingular = Refs.ref.slice(0, Refs.ref.length - 1);
+let modelName = nameSingular.charAt(0).toUpperCase() + nameSingular.slice(1);
+```
+
+Agora colocamos no módulo `runPopulateMongoose`:
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const populate = require('./populateMongoose');
+
+module.exports = {
+  run: (data, Refs, cb) => {
+    const query = { _id: data[Refs.path] };
+    const populateObj = {base: data, ref: Refs.ref, path: Refs.path, cb: cb};
+    let nameSingular = Refs.ref.slice(0, Refs.ref.length - 1);
+    let modelName = nameSingular.charAt(0).toUpperCase() + nameSingular.slice(1);
+    populate.run(mongoose.model(modelName), query, populateObj);
+  }
+};
+```
+
+Óbvio que você notou que eu já encapsulei em outro módulo, o `populateMongoose`, a lógica que faz o populate realmente dito:
+
+```js
+'use strict';
+module.exports = {
+  run: (model, query, populateObj) => {
+    let doc = populateObj.base;
+    model
+      .findOne(query)
+      .lean()
+      .exec( (err, data) => {
+        doc[populateObj.ref] = data;
+        populateObj.cb(err, doc);
+      });
+  }
+};
+```
+
+**Irei refatorar o nome dessas funções e variáveis! Estou criando isso nesse momento e escrevendo por isso está meio zuado ainda.**
+
+E pronto fizemos um populate meia-boca hehehehehee, é porque ainda não fizemos para referências dentro de *Arrays*, ainda.

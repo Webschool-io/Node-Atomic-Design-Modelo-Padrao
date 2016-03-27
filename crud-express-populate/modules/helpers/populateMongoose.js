@@ -1,6 +1,5 @@
 'use strict';
 module.exports = {
-  
   run: (model, query, populateObj) => {
     let doc = populateObj.base;
     model
