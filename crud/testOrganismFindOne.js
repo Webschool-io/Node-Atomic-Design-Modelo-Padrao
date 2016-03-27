@@ -3,6 +3,6 @@
 require('./config/db');
 const Organism = require('./organisms/aluno');
 const callback = require('./organisms/organelles/callback');
-const query = {}
+const query = {_id: '56f7786a8a5dfec973fcf378'}
 
-Organism.find(query, callback);
+Organism.findOne(query, callback);

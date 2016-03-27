@@ -1027,7 +1027,6 @@ const obj = {
 }
 
 Organism.create(obj, callback);
-
 ```
 
 ```
@@ -1041,8 +1040,134 @@ RETORNOU: { _id: 56f76ee8053c543373ad29ef,
   __v: 0 }
 ```
 
+#### find - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/aluno');
+const callback = require('./organisms/organelles/callback');
+const query = {}
+
+Organism.find(query, callback);
+```
+
+```
+➜ node testOrganismFind.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: [ { __v: 0,
+    link: 'https://github.com/Webschool-io/be-mean-instagram',
+    dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+    name: 'Suissa',
+    _id: 56f747955b319c936cbce9b4 },
+  { __v: 0,
+    link: 'https://github.com/Webschool-io/be-mean-instagram',
+    dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+    name: 'Be MEAN',
+    _id: 56f749a040671ef66c55c031 },
+  { __v: 0,
+    link: 'https://github.com/Webschool-io/workshop-js-funcional-free',
+    dateBegin: 'Sun Mar 27 2016 02:26:00 GMT-0300 (BRT)',
+    name: 'JS Funcional',
+    _id: 56f76ee8053c543373ad29ef } ]
+
+```
 
 
+#### findOne - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/curso');
+const callback = require('./organisms/organelles/callback');
+const query = {_id: '56f76ee8053c543373ad29ef'}
+
+Organism.findOne(query, callback);
+```
+
+```
+➜ node testOrganismFindOne.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { __v: 0,
+  link: 'https://github.com/Webschool-io/workshop-js-funcional-free',
+  dateBegin: 'Sun Mar 27 2016 02:26:00 GMT-0300 (BRT)',
+  name: 'JS Funcional',
+  _id: 56f76ee8053c543373ad29ef }
+```
+
+#### update - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/curso');
+const query = {_id: '56f76ee8053c543373ad29ef'}
+const mod = {name: 'Be MEAN Funcional'}
+const options = {};
+const callback = require('./organisms/organelles/callback');
+
+Organism.update(query, mod, options, callback);
+```
+
+```
+➜ node testOrganismUpdate.js 
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { ok: 1, nModified: 1, n: 1 }
+```
+
+Depois só rodar o `findOne` para confirmar a mudança do nome para `'Be MEAN Funcional'`:
+
+```
+➜ node testOrganismFindOne.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { __v: 0,
+  link: 'https://github.com/Webschool-io/workshop-js-funcional-free',
+  dateBegin: 'Sun Mar 27 2016 02:26:00 GMT-0300 (BRT)',
+  name: 'Be MEAN Funcional',
+  _id: 56f76ee8053c543373ad29ef }
+```
+
+#### remove - Testando
+
+Vamos apagar um Curso que não estou usando ali no aluno, então vendo o nosso retorno do `find` dos Cursos escolhi esse:
+
+```
+{ __v: 0,
+    link: 'https://github.com/Webschool-io/be-mean-instagram',
+    dateBegin: 'Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)',
+    name: 'Suissa',
+    _id: 56f747955b319c936cbce9b4 }
+```
+
+Então nosso teste ficará assim:
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const query = {_id: '56f747955b319c936cbce9b4'}
+const callback = require('./organisms/organelles/callback');
+
+Organism.remove(query, mod, options, callback);
+```
+
+E o retorno:
+
+```
+➜ (git:(master) ✗) ➜ node testOrganismRemove.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { ok: 1, n: 0 }
+```
 
 ### Aluno
 
@@ -1072,8 +1197,6 @@ module.exports = Cell;
 
 #### create - Testando
 
-Irei cadastrar sem Cursos por hora.
-
 ```js
 'use strict';
 
@@ -1084,22 +1207,378 @@ const obj = {
   user_id: '56f760cb94e41479715ff29f'
 , name: 'Suissa Aluno'
 , dateBirth: Date('1984/11/20')
+, cursos: ['56f76ee8053c543373ad29ef']
 }
 
 Organism.create(obj, callback);
 ```
 
 ```
- ➜ node testOrganismCreate.js
-RETORNOU: { cursos: [],
-  _id: 56f76d35c949c9137395d49a,
-  dateBirth: 'Sun Mar 27 2016 02:18:45 GMT-0300 (BRT)',
+➜ node testOrganismCreate.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { cursos: [ 56f76ee8053c543373ad29ef ],
+  _id: 56f7786a8a5dfec973fcf378,
+  dateBirth: 'Sun Mar 27 2016 03:06:34 GMT-0300 (BRT)',
   name: 'Suissa Aluno',
-  user_id: 56f760cb94e41479715ff29f,
   __v: 0 }
+
 ```
 
 
+#### find - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/aluno');
+const callback = require('./organisms/organelles/callback');
+const query = {}
+
+Organism.find(query, callback);
+```
+
+```
+➜ node testOrganismFind.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: [ { cursos: [ 56f749a040671ef66c55c031 ],
+    __v: 0,
+    dateBirth: 'Tue Nov 20 1984 00:00:00 GMT-0300 (BRT)',
+    name: 'Suissa',
+    _id: 56f749f4428681046d7c1d5c },
+  { cursos: [],
+    __v: 0,
+    dateBirth: 'Sun Mar 27 2016 02:18:45 GMT-0300 (BRT)',
+    name: 'Suissa Aluno',
+    user_id: 56f760cb94e41479715ff29f,
+    _id: 56f76d35c949c9137395d49a },
+  { cursos: [ 56f76ee8053c543373ad29ef ],
+    __v: 0,
+    dateBirth: 'Sun Mar 27 2016 03:06:34 GMT-0300 (BRT)',
+    name: 'Suissa Aluno',
+    _id: 56f7786a8a5dfec973fcf378 } ]
+```
+
+
+#### findOne - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/aluno');
+const callback = require('./organisms/organelles/callback');
+const query = {_id: '56f7786a8a5dfec973fcf378'}
+
+Organism.findOne(query, callback);
+```
+
+```
+➜ node testOrganismFindOne.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { cursos: [ 56f76ee8053c543373ad29ef ],
+  __v: 0,
+  dateBirth: 'Sun Mar 27 2016 03:06:34 GMT-0300 (BRT)',
+  name: 'Suissa Aluno',
+  _id: 56f7786a8a5dfec973fcf378 }
+```
+
+#### update - Testando
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const query = {_id: '56f75f7bc7a357337142a293'}
+const mod = {password: 'MudeiAquiMalandro'}
+const options = {};
+const callback = require('./organisms/organelles/callback');
+
+Organism.update(query, mod, options, callback);
+```
+
+```
+➜ node testOrganismUpdate.js 
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { ok: 1, nModified: 1, n: 1 }
+```
+
+Só para confirmar vamos rodar o `findOne` novamente:
+
+```
+➜ node testOrganismFindOne.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { cursos: [ 56f76ee8053c543373ad29ef ],
+  __v: 0,
+  dateBirth: 'Sun Mar 27 2016 03:06:34 GMT-0300 (BRT)',
+  name: 'Suissa ALUNO SAPECA',
+  _id: 56f7786a8a5dfec973fcf378 }
+```
+
+Pronto nosso valor modificado está ali: `name: 'Suissa ALUNO SAPECA'`.
+
+#### remove - Testando
+
+Vamos apagar um Aluno que não estou usando ali no aluno, então vendo o nosso retorno do `find` dos Alunos escolhi esse:
+
+```
+{ cursos: [],
+    __v: 0,
+    dateBirth: 'Sun Mar 27 2016 02:18:45 GMT-0300 (BRT)',
+    name: 'Suissa Aluno',
+    user_id: 56f760cb94e41479715ff29f,
+    _id: 56f76d35c949c9137395d49a }
+```
+
+Então nosso teste ficará assim:
+
+```js
+'use strict';
+
+require('./config/db');
+const Organism = require('./organisms/user');
+const query = {_id: '56f76d35c949c9137395d49a'}
+const callback = require('./organisms/organelles/callback');
+
+Organism.remove(query, mod, options, callback);
+```
+
+E o retorno:
+
+```
+➜ node testOrganismRemove.js
+Mongoose default connection connected to mongodb://localhost/modelo-padrao
+Mongoose default connection is open
+RETORNOU: { ok: 1, n: 1 }
+```
+
+
+**Não coloquei o exemplo dos Professores pois é a mesma coisa de Alunos.**
+
+> Perceba que não estamos usando TDD, no conceito de fazer os testes antes de criar a função, pois eu precisava mostrar BEM a arquitetura antes se não vocês não entenderiam tão facilmente. Mas não se preocupe, chegaremos lá.
+
+Agora que já temos nosso CRUD funcional vamos começar a integrar ele com nosso Framework de rotas, nesse caso o...
+
 ## Express
+
+![epaaaa](https://s-media-cache-ak0.pinimg.com/736x/fb/e2/53/fbe253bb518e4d749c40dbec5c6506dc.jpg)
+
+Demoramos, mas chegamos!
+
+Para facilitar nosso processo vamos iniciar um projeto com o `express-generator`:
+
+```
+express crud-express
+```
+
+Entre na pasta `crud-express`, execute o `npm install` e logo após instale o mongoose:
+
+```
+npm i --save mongoose
+```
+
+Depois copie as pastas (config, quarks, hadrons, atoms, molecules e organisms), que criamos anteriormente, para a pasta `modules/`.
+
+**Porém perceba que não criamos as pastas para cada módulo, mas quais serão módulos?**
+
+Lembra das nossas Entidades?
+
+- User
+- Aluno
+- Cursos
+- Professor
+
+Então vamos criar uma pasta para cada um e depois separar seus arquivos corretamente, iniciamos pelo **User**.
+
+Após criar a pasta `modules/User` você irá colar todas as pastas que estavam anteriormente em `modules`, **menos a `config` que deve estar na raiz do projeto**.
+
+Depois disso precisamos remover os arquivos desnecessários para esse módulo, iremos deixar apenas:
+
+- seu Organismo
+  + suas Organelas
+- sua Molécula
+- seus Átomos
+  + email
+  + password
+- seus Hadrons
+  + emailValidateMongoose
+  + passwordValidateMongoose
+- seus Quarks
+  + isEmpty
+  + isString
+  + isEmail
+  + isEmailMessage
+  + isPassword
+  + isPasswordMessage
+
+
+Beleza após fazer isso precisamos criar o módulo de rotas da nossa API em `modules/User/routes.js`:
+
+```js
+const express = require('express');
+const router = express.Router();
+
+router.get('/', (req, res) => {});
+router.get('/:id', (req, res) => {});
+router.post('/', (req, res) => {});
+router.put('/:id', (req, res) => {});
+router.delete('/:id', (req, res) => {});
+module.exports = router;
+```
+
+Criamos a estrutura dela e agora o que você acha que devemos fazer?
+
+**\- Chamar os Organismos tio Suissa.**
+
+![So Close](http://i.imgur.com/LQGSgLN.jpg)
+
+Sim nós temos que **usar** nosso Organismo, porém veja como está a interface das funções do CRUD:
+
+```js
+module.exports = (Organism) => {
+  return (obj, callback) => Organism.create(obj, callback);
+};
+```
+
+E agora olhe o que chega nas funções das rotas:
+
+```js
+(req, res) => {}
+```
+
+> Consegue perceber?
+
+
+> Ainda não?
+
+Então vou deixar mais claro, olhe nosso *callback*:
+
+```js
+module.exports = (err, data) => {
+  if (err) console.log('Erro:', err);
+  else console.log('RETORNOU:', data);
+};
+```
+
+Com isso conseguimos ver que a interface para usarmos nossas Organelas é:
+
+```js
+(obj, callback)
+```
+
+Pois é a mesma das funções assíncronas do Mongoose:
+
+```js
+Organism.create(obj, callback)
+```
+
+**Ok! Agora que vem a pergunta de 1 zilhão de bitcoins:**
+
+> Como faremos para reusar nossos módulos sem modificar nossa interface?
+
+Vamos começar pelo mais simples, colocando a lógica direto na rota:
+
+```js
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+const Organism = require('./organisms/user');
+
+router.get('/', (req, res) => {
+  let obj = req.body;
+  let callback = (err, data, req, res) => {
+    if (err) return console.log('Erro:', err);
+    res.json(data);
+  };
+
+  Organism.find(obj, (err, data) => {
+    callback(err, data, req, res);
+  });
+});
+module.exports = router;
+```
+
+Claro que não deixaremos dessa forma, refatorando ficará assim:
+
+```js
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+const Organism = require('./organisms/user');
+const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+router.get('/', (req, res) => {
+  let obj = req.body;
+
+  Organism.find(obj, (err, data) => {
+    callbackExpress(err, data, res);
+  });
+});
+module.exports = router;
+```
+
+Porém mesmo assim ainda temos lógica nessa função da rota, a qual deve somente executar uma ação, para conseguirmos retirar toda a lógica da rota precisaremos criar um *Controller* (**que eu chamarei por hora de BRAIN**).
+
+```js
+'use strict';
+
+module.exports = (Organism) => {
+
+  const callbackExpress = require('./organisms/organelles/callbackExpress');
+
+  return (req, res) => {
+    let obj = req.body;
+
+    Organism.find(obj, (err, data) => {
+      callbackExpress(err, data, res);
+    });
+  };
+};
+```
+
+Perceba que criei um módulo que **recebe um Organismo** e retorna uma função que recebe os parâmetros `(req, res)` para depois executar a ação utilizando esse Organismo passado na primeira vez.
+
+Para usar esse módulo é **MUITOOOOO SIMPLES**, *confira comigo no REPLAYYY*:
+
+```js
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+const Organism = require('./organisms/user');
+const callback = require('./brain')(Organism);
+
+router.get('/', (req, res) => {
+  callback(req, res);
+});
+module.exports = router;
+```
+
+Quando executamos `require('./brain')(Organism);` ele injeta nosso Organismo no `BRAIN` o qual retorna uma função que é usada em `callback(req, res)`.
+
+Só que eu não fiz todo esse malabarismo para deixar o `callback` com `(req, res)` a toa, fiz isso para que possamos deixar nosso código assim, já foi explicado em aulas passadas:
+
+```js
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+const Organism = require('./organisms/user');
+const callback = require('./brain')(Organism);
+
+router.get('/', (req, res) => {
+  callback(req, res);
+});
+module.exports = router;
+```
+
 
 
