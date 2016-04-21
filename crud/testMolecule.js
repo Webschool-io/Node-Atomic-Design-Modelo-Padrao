@@ -8,15 +8,15 @@ const Molecule = require('./molecules/'+MoleculeName.toLowerCase());
 
 const Organism = mongoose.model(MoleculeName, Molecule);
 
-const query = { _id: '56f75e0c822a32b4704567bf' };
+// const query = { _id: '56f75e0c822a32b4704567bf' };
 
 
-const cb = (err, data) => {
-  if(err) console.log('ERRO:', err);
-  else console.log('RETORNo:', data);
-};
+// const cb = (err, data) => {
+//   if(err) console.log('ERRO:', err);
+//   else console.log('RETORNo:', data);
+// };
 
-Organism.update(query, {email: ''}, cb);
+// Organism.update(query, {email: ''}, cb);
 
 
 // const populateAluno = (err, data) => {
@@ -39,6 +39,17 @@ Organism.update(query, {email: ''}, cb);
 
 // Organism.findOne(query, populate);
 
+const DNA = {
+  email: 'Suissa@ehnois.com'
+, password: '1234'
+};
+const Cell = new Organism(DNA);
+console.log('Cell', Cell);
+
+Cell.save((err, data) => {
+  if(err) console.log('ERRO:', err);
+  else console.log('RETORNO', data);
+})
 
 // const DNA = {
 //   name: 'Suissa'

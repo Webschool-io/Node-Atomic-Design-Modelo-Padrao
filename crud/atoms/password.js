@@ -1,5 +1,5 @@
 module.exports = {
   type: String
-, validate: require('./../hadrons/passwordValidateMongoose')
+, validate: require('./../hadrons/ValidateMongoose')('isPassword')
 , required: true
 }
