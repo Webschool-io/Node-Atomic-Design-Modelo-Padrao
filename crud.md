@@ -2107,3 +2107,50 @@ module.exports = {
 
 E pronto fizemos um populate meia-boca hehehehehee, é porque ainda não fizemos para referências dentro de *Arrays*, ainda.
 
+#### Populate manual - Arrays
+
+Para exemplificarmos como criar o populate para `_ids` que estão dentro de *Arrays* como na Molécula de `Alunos` onde temos `cursos`:
+
+```js
+const Molecule = {
+  user_id: require('./../atoms/userRef')(Schema)
+, name: require('./../atoms/name')
+, dateBirth: require('./../atoms/dateBirth')
+, cursos: [ require('./../atoms/cursoRef')(Schema) ]
+}
+```
+
+Onde o Átomo `cursoRef` possui apenas esse código abaixo:
+
+```js
+module.exports = (Schema) => {
+  return { type: Schema.Types.ObjectId, ref: 'cursos' };
+};
+```
+
+Depois de sabermos disso precisamos verificar como é a estrutura que o Mongoose cria para esse campo dando um  `console.log(Organism.schema.paths)` e o resultado é esse:
+
+```js
+   SchemaArray {
+     casterConstructor: { [Function: ObjectId] schemaName: 'ObjectId' },
+     caster: 
+      ObjectId {
+        path: 'cursos',
+        instance: 'ObjectID',
+        validators: [],
+        setters: [],
+        getters: [],
+        options: [Object],
+        _index: null },
+     path: 'cursos',
+     instance: 'Array',
+     validators: [],
+     setters: [],
+     getters: [],
+     options: { type: [Object] },
+     _index: null,
+     defaultValue: [Function] },
+```
+
+
+
