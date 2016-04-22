@@ -2103,9 +2103,6 @@ module.exports = {
 };
 ```
 
-**Irei refatorar o nome dessas funções e variáveis! Estou criando isso nesse momento e escrevendo por isso está meio zuado ainda.**
-
-E pronto fizemos um populate meia-boca hehehehehee, é porque ainda não fizemos para referências dentro de *Arrays*, ainda.
 
 #### Populate manual - Arrays
 
@@ -2131,26 +2128,306 @@ module.exports = (Schema) => {
 Depois de sabermos disso precisamos verificar como é a estrutura que o Mongoose cria para esse campo dando um  `console.log(Organism.schema.paths)` e o resultado é esse:
 
 ```js
-   SchemaArray {
-     casterConstructor: { [Function: ObjectId] schemaName: 'ObjectId' },
-     caster: 
-      ObjectId {
-        path: 'cursos',
-        instance: 'ObjectID',
-        validators: [],
-        setters: [],
-        getters: [],
-        options: [Object],
-        _index: null },
-     path: 'cursos',
-     instance: 'Array',
-     validators: [],
-     setters: [],
-     getters: [],
-     options: { type: [Object] },
-     _index: null,
-     defaultValue: [Function] },
+SchemaArray {
+   casterConstructor: { [Function: ObjectId] schemaName: 'ObjectId' },
+   caster: 
+    ObjectId {
+      path: 'cursos',
+      instance: 'ObjectID',
+      validators: [],
+      setters: [],
+      getters: [],
+      options: [Object],
+      _index: null },
+   path: 'cursos',
+   instance: 'Array',
+   validators: [],
+   setters: [],
+   getters: [],
+   options: { type: [Object] },
+   _index: null,
+   defaultValue: [Function] },
 ```
 
+Percebemos que tem uma estrutura diferente das anteriores precisamos mudar inicialmente o arquivo `findRefMongoose` que é o responsável por encontrar as referências para outras coleções.
 
+Como vimos anteriormente o `SchemaArray` possui o objeto `caster`, logo basta testar sua existência para posteriormente definir o `ref` e `path`:
+
+```js
+if(element.caster) {
+  let obj = {};
+  // ACOU UMA REFERENCIA EM ARRAY
+  obj.ref = element.options.type[0].ref;
+  obj.path = element.path;
+  RefsReturn.push(obj);
+}
+```
+
+Colocando tudo junto:
+
+```js
+'use strict';
+module.exports = (arr) => {
+  let Refs = [];
+  let RefsReturn = [];
+
+  Refs = arr.filter((element) => (element.options.ref) || element.caster);
+  Refs.forEach( (element, index) => {
+    if(element.options.ref) {
+      let obj = {};
+      // ACHOU UMA REFERENCIA SIMPLES
+      obj.ref = element.options.ref;
+      obj.path = element.path;
+      RefsReturn.push(obj);
+    }
+    if(element.caster) {
+      let obj = {};
+      // ACOU UMA REFERENCIA EM ARRAY
+      obj.ref = element.options.type[0].ref;
+      obj.path = element.path;
+      RefsReturn.push(obj);
+    }
+  });
+  return RefsReturn;
+};
+```
+
+Obviamente você percebeu que retornamos um *Array* em vez de um Objeto, por isso precisamos mudar o `runPopulateMongoose` pois é nele que estamos utilizando o `Refs`.
+
+Então como estamos recebendo um *Array* em vez de objeto iremos iterar sobre o `Refs`
+
+```js
+'use strict';
+
+const mongoose = require('mongoose');
+const populate = require('./populateMongoose');
+
+module.exports = {
+  run: (data, Refs, cb) => {
+    Refs.forEach( function(element, index) {
+      let query = { _id: data[element.path] };
+      let populateObj = {
+        base: data
+      , ref: element.ref
+      , path: element.path
+      , cb: cb
+      };
+      let nameSingular = element.ref.slice(0, element.ref.length - 1);
+      let modelName = nameSingular.charAt(0).toUpperCase() + nameSingular.slice(1);
+      populate.run(mongoose.model(modelName), query, populateObj, Refs, index);
+    });
+  }
+};
+```
+
+E agora chegamos no coração do negócio, o `populateMongoose`:
+
+```js
+'use strict';
+module.exports = {
+  run: (model, query, populateObj) => {
+    let doc = populateObj.base;
+    model
+      .findOne(query)
+      .lean()
+      .exec( (err, data) => {
+        doc[populateObj.ref] = data;
+        populateObj.cb(err, doc);
+      });
+  }
+};
+```
+
+Precisamos adicionar nesse módulo a lógica para buscar cada um dos elementos referenciados pelos seus `_ids`, porém antes de tudo necessitamos testar se a a nossa `query._id` é um *Array*, basta testar com:
+
+```js
+Array.isArray(query._id)
+```
+
+Pronto agora sabendo que temos um *Array* podemos iterar sobre ele para que em cada iteração nós busquemos o elemento e adicionarmos a resposta no seu `path`:
+
+```js
+
+'use strict';
+module.exports = {
+  run: (model, query, populateObj, Refs, index) => {
+    let doc = populateObj.base;
+    if(Array.isArray(query._id)) {
+      query._id.forEach( function(element, index) {
+        let q = {_id: element}
+        model
+          .findOne(q)
+          .lean()
+          .exec( (err, data) => {
+            if(!index) doc[populateObj.path] = [];
+
+            doc[populateObj.path].push(data);
+            if(index === Refs.length - 1) {
+              populateObj.cb(err, doc);
+            }
+          });
+      });
+    }
+    else {
+      //  Referencia unica tipo users_id
+      model
+        .findOne(query)
+        .lean()
+        .exec( (err, data) => {
+          let name = populateObj.path.split('_id')[0];
+          delete doc[populateObj.path];
+          doc[name] = data;
+          if(index === Refs.length - 1) {
+            populateObj.cb(err, doc);
+          }
+        });
+    }
+  }
+}
+```
+
+Podemos melhorar esse código é claroooooo!
+
+Primeira coisa que faremos é criar uma função para o callback no `else`:
+
+```js
+const refObjectId = (err, data) => {
+  let name = populateObj.path.split('_id')[0];
+  // deleto o campo user_id
+  delete doc[populateObj.path];
+  // e adiciono o campo user
+  doc[name] = data;
+  if(index === Refs.length - 1) populateObj.cb(err, doc);
+}
+```
+
+Depois criamos o *callback* da busca via *Array*:
+
+```js
+
+const refArrayObjectId = (element, index) => {
+  let q = {_id: element}
+  model
+    .findOne(q)
+    .lean()
+    .exec( (err, data) => {
+      // caso seja a primeira iteração
+      // limpamos o Array
+      if(!index) doc[populateObj.path] = [];
+
+      doc[populateObj.path].push(data);
+      if(index === Refs.length - 1) {
+        populateObj.cb(err, doc);
+      }
+    });
+}
+```
+
+Juntando tudo temos:
+
+```js
+'use strict';
+
+module.exports = {
+  run: (model, query, populateObj, Refs, index) => {
+
+    let doc = populateObj.base;
+
+    const refObjectId = (err, data) => {
+      let name = populateObj.path.split('_id')[0];
+      // deleto o campo user_id
+      delete doc[populateObj.path];
+      // e adiciono o campo user
+      doc[name] = data;
+      if(index === Refs.length - 1) populateObj.cb(err, doc);
+    }
+
+    const refArrayObjectId = (element, index) => {
+      let q = {_id: element}
+      model
+        .findOne(q)
+        .lean()
+        .exec( (err, data) => {
+          // caso seja a primeira iteração
+          // limpamos o Array
+          if(!index) doc[populateObj.path] = [];
+
+          doc[populateObj.path].push(data);
+          if(index === Refs.length - 1) {
+            populateObj.cb(err, doc);
+          }
+        });
+    }
+
+    if(Array.isArray(query._id)) query._id.forEach(refArrayObjectId);
+    else model.findOne(query).lean().exec(refObjectId);
+  }
+}
+```
+
+## Populate Padrão
+
+Com nosso *populate* manual teremos o seguinte padrão:
+
+> Campo que referencie diretamente um `_id` será removido e adicionado o objeto retornado da sua referência.
+
+> Campo que referencie um *Array* de `_ids` será sobrescrito com os objetos retornados da sua referência.
+
+Ex.:
+
+```js
+// Átomo
+module.exports = (Schema) => {
+  return { type: Schema.Types.ObjectId, ref: 'users' };
+};
+```
+
+```js
+// Átomo
+module.exports = (Schema) => {
+  return { type: Schema.Types.ObjectId, ref: 'cursos' };
+};
+```
+
+```js
+const Molecule = {
+  user_id: require('./../atoms/userRef')(Schema)
+, name: require('./../atoms/name')
+, disciplinas: [ require('./../atoms/cursoRef')(Schema) ]
+}
+```
+
+Percebeu que usei `disciplinas` em vez de `cursos` né?
+
+Foi apenas para mostrar na resposta que funciona com qualquer nome. :p
+
+Resposta da busca por 1 entidade:
+
+```js
+{
+    "_id": "56f7d79820475b3884c127e2",
+    "disciplinas": [
+        {
+            "_id": "56f749a040671ef66c55c031",
+            "name": "Be MEAN",
+            "dateBegin": "Mon Jun 20 2016 00:00:00 GMT-0300 (BRT)",
+            "link": "https://github.com/Webschool-io/be-mean-instagram",
+            "__v": 0
+        },
+        {
+            "_id": "56f76ee8053c543373ad29ef",
+            "name": "Be MEAN Funcional",
+            "dateBegin": "Sun Mar 27 2016 02:26:00 GMT-0300 (BRT)",
+            "link": "https://github.com/Webschool-io/workshop-js-funcional-free",
+            "__v": 0
+        }
+    ],
+    "user": {
+        "_id": "56f7b8f45a1bd68b7871640f",
+        "email": "macio@sedoso.teta",
+        "password": "tetinhaMacia666",
+        "__v": 0
+    }
+}
+```
 
