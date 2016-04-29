@@ -10,7 +10,6 @@ module.exports = {
       let populateObj = {base: data, ref: element.ref, path: element.path, cb: cb};
       let nameSingular = element.ref.slice(0, element.ref.length - 1);
       let modelName = nameSingular.charAt(0).toUpperCase() + nameSingular.slice(1);
-      // console.log('populateObj', populateObj)
       populate.run(mongoose.model(modelName), query, populateObj, Refs, index);
     });
   }

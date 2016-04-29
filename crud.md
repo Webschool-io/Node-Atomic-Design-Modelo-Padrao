@@ -2316,14 +2316,24 @@ const refArrayObjectId = (element, index) => {
       if(!index) doc[populateObj.path] = [];
 
       doc[populateObj.path].push(data);
-      if(index === query._id.length -1) {
-        populateObj.cb(err, doc);
-      }
+      if(index  === query._id.length -1) populateObj.cb(err, doc);
     });
 }
 ```
 
-Juntando tudo temos:
+Perceba que nosso cenário de parada é esse: `if(index  === query._id.length -1)` pois aí que ele irá executar o *callback* `populateObj.cb(err, doc)`.
+
+**Mas você entendeu o porquê?**
+
+Então pense comigo.
+
+Estamos executando esse `findOne` dentro de um `forEach`, aqui: `query._id.forEach(refArrayObjectId);`, então se nosso *Array* `query._id` possuir 3 valores a serem buscados o tamanho, `query._id.length`, será igual a 3 correto?
+
+Porém como sabemos o índice de um *Array* começa em `0`, logo não podemos iterar do `0` até o `3` pois assim teríamos `4` passos e não `3`, por isso precisamos subtrair `1` de `query._id.length`, dessa forma nosso condição de parada será exatamente no último item desse *Array*. Aí sim podemos popular a resposta com os valores consultados e adicionados em `doc`.
+
+Logo é por isso que executamos `populateObj.cb(err, doc)` usando o *Array* `doc`, o qual possuirá todos os valores buscados graças ao `doc[populateObj.path].push(data);`, e não apenas o `data` que, vem resposta do `findOne` e, retorna apenas o **último** elemento achado pelo `findOne`
+
+Agora juntando tudo temos:
 
 ```js
 'use strict';
@@ -2353,9 +2363,8 @@ module.exports = {
           if(!index) doc[populateObj.path] = [];
 
           doc[populateObj.path].push(data);
-          if(index === Refs.length) {
-            populateObj.cb(err, doc);
-          }
+
+          if(index  === query._id.length -1) populateObj.cb(err, doc);
         });
     }
 
