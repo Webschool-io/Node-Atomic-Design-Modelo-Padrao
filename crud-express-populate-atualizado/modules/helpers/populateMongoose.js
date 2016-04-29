@@ -25,7 +25,7 @@ module.exports = {
           if(!index) doc[populateObj.path] = [];
 
           doc[populateObj.path].push(data);
-          if(index === Refs.length - 1) {
+          if(index === Refs.length) {
             populateObj.cb(err, doc);
           }
         });
