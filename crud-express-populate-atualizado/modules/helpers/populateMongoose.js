@@ -26,9 +26,7 @@ module.exports = {
           if(!index) doc[populateObj.path] = [];
 
           doc[populateObj.path].push(data);
-          if(index  === query._id.length -1) {
-            populateObj.cb(err, doc);
-          }
+          if(index  === query._id.length -1) populateObj.cb(err, doc);
         });
     }
 
