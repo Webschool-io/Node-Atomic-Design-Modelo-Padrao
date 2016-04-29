@@ -16,6 +16,7 @@ module.exports = {
 
     const refArrayObjectId = (element, index) => {
       let q = {_id: element}
+      console.log('q', q)
       model
         .findOne(q)
         .lean()
@@ -25,7 +26,7 @@ module.exports = {
           if(!index) doc[populateObj.path] = [];
 
           doc[populateObj.path].push(data);
-          if(index === Refs.length) {
+          if(index  === query._id.length -1) {
             populateObj.cb(err, doc);
           }
         });
